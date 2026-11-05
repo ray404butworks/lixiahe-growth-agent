@@ -1,0 +1,25 @@
+{
+  "repository": "https://github.com/maxgfr/csv-ai-analyzer",
+  "commit": "de46cf9d1d51a433eece34a34717227cecd375e8",
+  "version": "1.17.9",
+  "license": "MIT",
+  "adapted_on": "2026-11-05",
+  "reused": [
+    "Next.js monorepo and Docker configuration",
+    "src/lib/csv-parser.ts",
+    "src/lib/xlsx-parser.ts",
+    "packages/csv-charts-ai parsers and shared type helpers",
+    "upstream unit tests"
+  ],
+  "new": [
+    "Chinese agricultural business workspace",
+    "field mapping and quality contract",
+    "exact fixed-point financial metrics",
+    "synthetic agricultural datasets",
+    "phase 1 and 2 regression tests",
+    "phase-three local server and blank-key adapter",
+    "evidence-based rules and source cards",
+    "verified-fact marketing drafts and seven-day plan"
+  ],
+  "status": "v0.3.0 phase-three development snapshot; empty model key; no live LLM calls or production deployment"
+}

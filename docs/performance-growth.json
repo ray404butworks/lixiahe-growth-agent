@@ -1,0 +1,36 @@
+{
+  "measured_at": "2026-11-04T14:59:03.691Z",
+  "runtime": "v24.22.1",
+  "environment": "current managed Linux execution container",
+  "input_rows": 1000,
+  "runs": [
+    {
+      "duration_ms": 225.33,
+      "valid_rows": 1000,
+      "active_rows": 973
+    },
+    {
+      "duration_ms": 133.92,
+      "valid_rows": 1000,
+      "active_rows": 973
+    },
+    {
+      "duration_ms": 83.74,
+      "valid_rows": 1000,
+      "active_rows": 973
+    },
+    {
+      "duration_ms": 54.81,
+      "valid_rows": 1000,
+      "active_rows": 973
+    },
+    {
+      "duration_ms": 57.36,
+      "valid_rows": 1000,
+      "active_rows": 973
+    }
+  ],
+  "maximum_ms": 225.33,
+  "target_ms": 5000,
+  "scope": "CSV parsing + mapping + validation + metrics; excludes UI rendering, filesystem read and LLM"
+}

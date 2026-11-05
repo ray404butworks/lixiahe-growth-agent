@@ -1,0 +1,11 @@
+{
+  "measured_at": "2026-11-04T17:11:47Z",
+  "unpacked_without_node_modules": true,
+  "node_runtime": "v24.22.1",
+  "static_routes": 4,
+  "diagnosis_status": 200,
+  "content_status": 200,
+  "model_mode": "rules",
+  "real_model_calls": 0,
+  "scope": "Linux Node24 unpacked archive; Windows browser auto-open not tested"
+}

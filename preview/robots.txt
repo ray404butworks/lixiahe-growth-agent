@@ -1,0 +1,8 @@
+# Robots.txt for CSV AI Analyzer
+# https://maxgfr.github.io/csv-ai-analyzer
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://maxgfr.github.io/csv-ai-analyzer/sitemap.xml

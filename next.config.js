@@ -1,0 +1,43 @@
+/**
+ * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
+ * for Docker builds.
+ */
+import "./src/env.js";
+import { readFileSync } from "fs";
+
+const pkg = JSON.parse(readFileSync("./package.json", "utf-8"));
+
+/** @type {import("next").NextConfig} */
+const config = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: pkg.version,
+  },
+  // Output mode: "export" for GitHub Pages, "standalone" for Docker self-hosting
+  // Set NEXT_OUTPUT_MODE=standalone for Docker builds
+  output: process.env.NODE_ENV === "development" ? undefined : "export",
+  rewrites:
+    process.env.NODE_ENV === "development"
+      ? async () => [
+          {
+            source: "/api/:path*",
+            destination: "http://127.0.0.1:8080/api/:path*",
+          },
+        ]
+      : undefined,
+
+  // Base path for GitHub Pages (repository name)
+  // Set via NEXT_PUBLIC_BASE_PATH env var in GitHub Actions
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || "",
+
+  // Disable image optimization for static export
+  images: {
+    unoptimized: true,
+  },
+
+  reactCompiler: true,
+
+  // Always use trailing slash for GitHub Pages compatibility
+  trailingSlash: true,
+};
+
+export default config;

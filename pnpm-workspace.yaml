@@ -1,0 +1,10 @@
+packages:
+  - 'packages/*'
+
+allowBuilds:
+  core-js: false
+  esbuild: true
+  unrs-resolver: true
+
+overrides:
+  katex: ^0.18.2

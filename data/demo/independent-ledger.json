@@ -1,0 +1,134 @@
+{
+  "normal": {
+    "totals": {
+      "gross_sales": "237164",
+      "net_sales": "225436",
+      "known_refunds": "11728",
+      "known_variable_costs": "148752",
+      "contribution": "76684",
+      "quantity": "2299",
+      "line_count": 933,
+      "order_count": 933
+    },
+    "channels": {
+      "微信私域": {
+        "gross_sales": "70760",
+        "net_sales": "69540",
+        "known_refunds": "1220",
+        "known_variable_costs": "43776",
+        "contribution": "25764",
+        "quantity": "715",
+        "line_count": 296,
+        "order_count": 296
+      },
+      "抖音店铺": {
+        "gross_sales": "77748",
+        "net_sales": "73306",
+        "known_refunds": "4442",
+        "known_variable_costs": "52004",
+        "contribution": "21302",
+        "quantity": "788",
+        "line_count": 326,
+        "order_count": 326
+      },
+      "线下团购": {
+        "gross_sales": "88656",
+        "net_sales": "82590",
+        "known_refunds": "6066",
+        "known_variable_costs": "52972",
+        "contribution": "29618",
+        "quantity": "796",
+        "line_count": 311,
+        "order_count": 311
+      }
+    }
+  },
+  "low-contribution": {
+    "totals": {
+      "gross_sales": "237164",
+      "net_sales": "225436",
+      "known_refunds": "11728",
+      "known_variable_costs": "185264",
+      "contribution": "40172",
+      "quantity": "2299",
+      "line_count": 933,
+      "order_count": 933
+    },
+    "channels": {
+      "微信私域": {
+        "gross_sales": "70760",
+        "net_sales": "69540",
+        "known_refunds": "1220",
+        "known_variable_costs": "43776",
+        "contribution": "25764",
+        "quantity": "715",
+        "line_count": 296,
+        "order_count": 296
+      },
+      "抖音店铺": {
+        "gross_sales": "77748",
+        "net_sales": "73306",
+        "known_refunds": "4442",
+        "known_variable_costs": "88516",
+        "contribution": "-15210",
+        "quantity": "788",
+        "line_count": 326,
+        "order_count": 326
+      },
+      "线下团购": {
+        "gross_sales": "88656",
+        "net_sales": "82590",
+        "known_refunds": "6066",
+        "known_variable_costs": "52972",
+        "contribution": "29618",
+        "quantity": "796",
+        "line_count": 311,
+        "order_count": 311
+      }
+    }
+  },
+  "high-refund": {
+    "totals": {
+      "gross_sales": "237164",
+      "net_sales": "182344",
+      "known_refunds": "54820",
+      "known_variable_costs": "148752",
+      "contribution": "33592",
+      "quantity": "2299",
+      "line_count": 933,
+      "order_count": 933
+    },
+    "channels": {
+      "微信私域": {
+        "gross_sales": "70760",
+        "net_sales": "55176",
+        "known_refunds": "15584",
+        "known_variable_costs": "43776",
+        "contribution": "11400",
+        "quantity": "715",
+        "line_count": 296,
+        "order_count": 296
+      },
+      "抖音店铺": {
+        "gross_sales": "77748",
+        "net_sales": "59626",
+        "known_refunds": "18122",
+        "known_variable_costs": "52004",
+        "contribution": "7622",
+        "quantity": "788",
+        "line_count": 326,
+        "order_count": 326
+      },
+      "线下团购": {
+        "gross_sales": "88656",
+        "net_sales": "67542",
+        "known_refunds": "21114",
+        "known_variable_costs": "52972",
+        "contribution": "14570",
+        "quantity": "796",
+        "line_count": 311,
+        "order_count": 311
+      }
+    }
+  }
+}
