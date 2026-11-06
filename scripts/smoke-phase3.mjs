@@ -64,7 +64,7 @@ try {
   assert(content.text.product_copy.includes("【待核对产地】"));
   const homepage = await fetch(base);
   assert.equal(homepage.status, 200);
-  assert((await homepage.text()).includes("阶段 01—03"));
+  assert((await homepage.text()).includes("阶段 01—04"));
   assert.equal((await fetch(`${base}/.env.local`)).status, 404);
   assert.equal(
     (

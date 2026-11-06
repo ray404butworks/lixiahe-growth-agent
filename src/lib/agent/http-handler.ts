@@ -114,7 +114,7 @@ export function createAgentHandler(options: HandlerOptions = {}) {
           mode: unavailableReason(config) ? "rules" : "model-ready",
           model_configured: !unavailableReason(config),
           reason: unavailableReason(config),
-          version: "0.3.0",
+          version: "0.4.0",
           request_id: requestId,
         });
       if (request.method === "GET" && path === "/api/knowledge")

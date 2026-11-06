@@ -60,7 +60,13 @@ import "~/styles/agent.css";
 import { AgentWorkbench } from "./agent-workbench";
 import type { DiagnosisRequest } from "~/lib/agent/schema";
 
-type View = "import" | "dashboard" | "diagnose" | "content" | "knowledge";
+type View =
+  | "import"
+  | "dashboard"
+  | "diagnose"
+  | "content"
+  | "knowledge"
+  | "report";
 const pages: Record<
   View,
   { label: string; title: string; description: string }
@@ -89,6 +95,11 @@ const pages: Record<
     label: "本土知识",
     title: "地方知识，不只换个地名。",
     description: "公开来源、核验日期和使用边界，让本土化有据可查。",
+  },
+  report: {
+    label: "经营报告",
+    title: "把这次经营复盘带走。",
+    description: "汇总经营指标、诊断证据与行动计划，支持本地导出。",
   },
 };
 type Dataset = {
@@ -374,23 +385,21 @@ export function GrowthWorkspace({
             经营看板
             <ChevronRight size={14} />
           </button>
-          {(["diagnose", "content", "knowledge"] as const).map((item) => (
-            <button
-              key={item}
-              className={view === item ? "active" : ""}
-              onClick={() => setView(item)}
-            >
-              <Leaf size={18} />
-              {pages[item].label}
-              <ChevronRight size={14} />
-            </button>
-          ))}
+          {(["diagnose", "content", "knowledge", "report"] as const).map(
+            (item) => (
+              <button
+                key={item}
+                className={view === item ? "active" : ""}
+                onClick={() => setView(item)}
+              >
+                <Leaf size={18} />
+                {pages[item].label}
+                <ChevronRight size={14} />
+              </button>
+            ),
+          )}
         </nav>
         <div className="sidebar-rule" />
-        <p className="nav-caption">后续开发</p>
-        <div className="future-item">
-          经营报告 <span>阶段四</span>
-        </div>
         <div className="sidebar-bottom">
           <ShieldCheck size={19} />
           <p>
@@ -416,7 +425,7 @@ export function GrowthWorkspace({
               <p>{pages[view].description}</p>
             </div>
             <span className="phase-tag">
-              阶段 01—03 <Check size={13} />
+              阶段 01—04 <Check size={13} />
             </span>
           </div>
           {notice && (
@@ -1176,10 +1185,17 @@ export function GrowthWorkspace({
                       </button>
                     </div>
                     <p className="fineprint">
-                      可继续基于当前筛选数据生成经营诊断与营销草稿；正式报告属于阶段四。
+                      经营报告采用当前筛选范围，可先导出数据摘要，也可附上诊断和营销草稿。
                     </p>
                     {showSource && <QualityPanel quality={dataset.quality} />}
                     <div className="file-tools">
+                      <button
+                        className="text-button"
+                        onClick={() => setView("report")}
+                      >
+                        <ArrowRight size={15} />
+                        查看经营报告
+                      </button>
                       <button
                         className="text-button"
                         onClick={() =>
@@ -1205,12 +1221,16 @@ export function GrowthWorkspace({
           )}
           <AgentWorkbench
             view={
-              view === "diagnose" || view === "content" || view === "knowledge"
+              view === "diagnose" ||
+              view === "content" ||
+              view === "knowledge" ||
+              view === "report"
                 ? view
                 : null
             }
             input={agentInput}
             snapshot={snapshot ?? null}
+            quality={dataset?.quality}
             onNavigate={setView}
           />
           <footer className="app-footer">

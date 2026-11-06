@@ -46,6 +46,7 @@
     "node_modules",
     "generated",
     "out",
+    "preview",
     ".next",
     "packages",
     "server-dist"

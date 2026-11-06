@@ -5,6 +5,8 @@ node_modules
 # Build output
 .next
 out
+preview
+server-dist
 
 # Development files
 .git
@@ -25,6 +27,7 @@ coverage
 # Misc
 .DS_Store
 *.log
-.env*.local
+.env*
+!.env.example
 test-results
 playwright-report

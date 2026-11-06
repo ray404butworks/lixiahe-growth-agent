@@ -25,12 +25,15 @@ import type {
   ProductFacts,
 } from "~/lib/agent/schema";
 import type { MetricSnapshot } from "~/lib/growth/metrics";
+import type { QualityReport } from "~/lib/growth/import";
 import { FIELDS } from "~/lib/growth/contract";
-type AgentView = "diagnose" | "content" | "knowledge";
+import { GrowthReportView } from "./growth-report";
+type AgentView = "diagnose" | "content" | "knowledge" | "report";
 type Props = {
   view: AgentView | null;
   input: DiagnosisRequest | null;
   snapshot: MetricSnapshot | null;
+  quality?: QualityReport;
   onNavigate: (view: AgentView | "import") => void;
 };
 const reasons: Record<FallbackReason, string> = {
@@ -82,7 +85,13 @@ export function marketingPlainText(draft: MarketingDraft): string {
     ).map((card) => `${card.knowledge_id} ${card.title}｜${card.source_url}`),
   ].join("\n\n");
 }
-export function AgentWorkbench({ view, input, snapshot, onNavigate }: Props) {
+export function AgentWorkbench({
+  view,
+  input,
+  snapshot,
+  quality,
+  onNavigate,
+}: Props) {
   const [diagnosis, setDiagnosis] = useState<Diagnosis | null>(null);
   const [draft, setDraft] = useState<MarketingDraft | null>(null);
   const [selected, setSelected] = useState("");
@@ -111,7 +120,7 @@ export function AgentWorkbench({ view, input, snapshot, onNavigate }: Props) {
     setStatus("");
     setBusy(false);
     setEdited(false);
-  }, [fingerprint]);
+  }, [fingerprint, input]);
   useEffect(() => {
     const abort = new AbortController();
     void fetch("/api/health", { signal: abort.signal })
@@ -252,6 +261,26 @@ export function AgentWorkbench({ view, input, snapshot, onNavigate }: Props) {
     }
   }
   if (view === null) return null;
+  if (view === "report")
+    return (
+      <GrowthReportView
+        source={
+          snapshot && input && quality
+            ? {
+                snapshot,
+                quality,
+                synthetic: input.synthetic,
+                channel: input.filters.channel,
+                diagnosis,
+                draft,
+                edited,
+              }
+            : null
+        }
+        onImport={() => onNavigate("import")}
+        onDiagnose={() => onNavigate("diagnose")}
+      />
+    );
   if (view === "knowledge")
     return (
       <section className="knowledge-page">
@@ -628,6 +657,13 @@ export function AgentWorkbench({ view, input, snapshot, onNavigate }: Props) {
                   <h2>营销草稿，交给你最后把关</h2>
                   <p>{AI_DRAFT_LABEL}</p>
                 </div>
+                <button
+                  className="button secondary"
+                  onClick={() => onNavigate("report")}
+                >
+                  <FileText size={16} />
+                  查看经营报告
+                </button>
                 <button
                   className="button secondary"
                   onClick={() => void copy()}

@@ -140,6 +140,23 @@ describe("阶段三用户流程（组件环境）", () => {
       target: { value: "人工编辑后的商品文案" },
     });
     expect(screen.getByText("已人工编辑 · 仍待复核")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "查看经营报告" }));
+    expect(
+      screen.getByRole("heading", { name: "里下河 · 经营复盘报告" }),
+    ).toBeTruthy();
+    expect(screen.getByText(/人工编辑后的商品文案/)).toBeTruthy();
+    expect(screen.getByRole("table", { name: "七日行动清单" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "下载 CSV 汇总" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "经营看板" }));
+    fireEvent.change(screen.getByLabelText("销售渠道", { exact: true }), {
+      target: { value: "微信私域" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "经营报告", exact: true }),
+    );
+    expect(screen.getByText(/当前筛选范围尚无诊断/)).toBeTruthy();
+    expect(screen.queryByText(/人工编辑后的商品文案/)).toBeNull();
   });
   it("危险商品事实会阻止生成", async () => {
     await openFacts();

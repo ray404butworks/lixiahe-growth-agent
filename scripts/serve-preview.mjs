@@ -12,7 +12,7 @@ let createAgentHandler;
 try {
   ({ createAgentHandler } = await import("../server-dist/server.js"));
 } catch {
-  console.error("缺少阶段三服务文件。请解压完整交付包，或先运行 pnpm build。");
+  console.error("缺少本地服务文件。请解压完整交付包，或先运行 pnpm build。");
   process.exit(1);
 }
 const handler = createAgentHandler({
@@ -97,7 +97,7 @@ server.on("error", (error) => {
 });
 server.listen(port, host, () => {
   const url = `http://127.0.0.1:${port}`;
-  console.log(`里下河阶段三已启动：${url} （关闭终端即停止）`);
+  console.log(`里下河阶段四已启动：${url} （关闭终端即停止）`);
   console.log("API Key留空时自动使用离线规则模式。请在浏览器打开上述地址。");
   if (process.platform === "win32" && process.env.LIXIAHE_NO_OPEN !== "true")
     execFile(

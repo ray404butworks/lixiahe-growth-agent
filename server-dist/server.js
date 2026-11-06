@@ -20689,7 +20689,7 @@ function createAgentHandler(options = {}) {
           mode: unavailableReason(config2) ? "rules" : "model-ready",
           model_configured: !unavailableReason(config2),
           reason: unavailableReason(config2),
-          version: "0.3.0",
+          version: "0.4.0",
           request_id: requestId
         });
       if (request.method === "GET" && path === "/api/knowledge")
