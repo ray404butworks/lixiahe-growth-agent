@@ -1,20 +1,24 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import {
   ArrowRight,
   BarChart3,
-  Check,
-  ChevronRight,
+  ChevronDown,
   Download,
   FileSpreadsheet,
-  Leaf,
   ShieldCheck,
   Upload,
   X,
   AlertCircle,
   CheckCircle2,
   SlidersHorizontal,
+  Menu,
+  ClipboardList,
+  NotebookPen,
+  BookOpen,
+  ScanLine,
 } from "lucide-react";
 import {
   AreaChart,
@@ -57,7 +61,11 @@ import {
 import { parseXLSX } from "~/lib/xlsx-parser";
 import "~/styles/growth.css";
 import "~/styles/agent.css";
+import "~/styles/workspace.css";
+import "~/styles/dashboard.css";
+import "~/styles/import.css";
 import { AgentWorkbench } from "./agent-workbench";
+import { WorkspaceEmptyState } from "./workspace-empty-state";
 import type { DiagnosisRequest } from "~/lib/agent/schema";
 
 type View =
@@ -67,41 +75,64 @@ type View =
   | "content"
   | "knowledge"
   | "report";
-const pages: Record<
-  View,
-  { label: string; title: string; description: string }
-> = {
-  import: {
-    label: "数据导入",
-    title: "从销售表，读懂生意。",
-    description: "合并渠道视角，看清销售与成本，再决定下一步。",
-  },
-  dashboard: {
-    label: "经营看板",
-    title: "每一笔经营，都有依据。",
-    description: "先看可信数据，再谈经营判断。所有指标均由程序计算。",
-  },
-  diagnose: {
-    label: "经营诊断",
-    title: "有了依据，再做决定。",
-    description: "数据观察、经营假设、下一步行动，逐条说清楚。",
-  },
-  content: {
-    label: "营销内容",
-    title: "把下一步，写成可用的内容。",
-    description: "用确认过的商品事实，生成可以编辑的营销草稿。",
-  },
-  knowledge: {
-    label: "本土知识",
-    title: "地方知识，不只换个地名。",
-    description: "公开来源、核验日期和使用边界，让本土化有据可查。",
-  },
-  report: {
-    label: "经营报告",
-    title: "把这次经营复盘带走。",
-    description: "汇总经营指标、诊断证据与行动计划，支持本地导出。",
-  },
+const pages: Record<View, { label: string; title: string }> = {
+  import: { label: "数据导入", title: "导入销售数据" },
+  dashboard: { label: "经营看板", title: "经营看板" },
+  diagnose: { label: "经营诊断", title: "经营诊断" },
+  content: { label: "营销内容", title: "营销内容" },
+  knowledge: { label: "本土知识", title: "本土知识" },
+  report: { label: "经营报告", title: "经营报告" },
 };
+const workspaceNavigation = [
+  { view: "import", icon: FileSpreadsheet },
+  { view: "dashboard", icon: BarChart3 },
+  { view: "diagnose", icon: ScanLine },
+  { view: "content", icon: NotebookPen },
+  { view: "report", icon: ClipboardList },
+  { view: "knowledge", icon: BookOpen },
+] as const;
+
+function WorkspaceNavigation({
+  current,
+  onNavigate,
+}: {
+  current: View;
+  onNavigate: (view: View) => void;
+}) {
+  return (
+    <nav className="workspace-navigation" aria-label="工作台导航">
+      {workspaceNavigation.map(({ view, icon: Icon }) => (
+        <button
+          key={view}
+          type="button"
+          aria-current={view === current ? "page" : undefined}
+          className={view === current ? "active" : ""}
+          onClick={() => onNavigate(view)}
+        >
+          <Icon size={17} aria-hidden="true" />
+          {pages[view].label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+function WorkspaceBrand() {
+  return (
+    <a href="/" className="brand">
+      <span className="brand-mark">
+        <Image
+          src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/duotian-mark.svg`}
+          width={33}
+          height={33}
+          alt=""
+        />
+      </span>
+      <span>里下河</span>
+    </a>
+  );
+}
+
 type Dataset = {
   rows: OrderRow[];
   quality: QualityReport;
@@ -126,6 +157,10 @@ function shortNumber(value: number) {
   return Math.abs(value) >= 10000
     ? `${(value / 10000).toFixed(1)}万`
     : String(Math.round(value));
+}
+
+function hasMoreMenuEntries(menu: HTMLElement) {
+  return menu.scrollHeight - menu.clientHeight - menu.scrollTop > 1;
 }
 
 export function GrowthWorkspace({
@@ -155,12 +190,26 @@ export function GrowthWorkspace({
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [channel, setChannel] = useState("");
+  const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false);
+  const [workspaceMenuHasMore, setWorkspaceMenuHasMore] = useState(false);
+  const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(false);
   const [showSource, setShowSource] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [notice, setNotice] = useState("");
   const request = useRef(0);
   const fileInput = useRef<HTMLInputElement>(null);
+  const workspaceMenuScroll = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const menu = workspaceMenuScroll.current;
+    if (!workspaceMenuOpen || !menu) return;
+    const observer = new ResizeObserver(() => {
+      setWorkspaceMenuHasMore(hasMoreMenuEntries(menu));
+    });
+    observer.observe(menu);
+    if (menu.firstElementChild) observer.observe(menu.firstElementChild);
+    return () => observer.disconnect();
+  }, [view, workspaceMenuOpen]);
   const normalized = useMemo(() => {
     if (!raw) return null;
     try {
@@ -191,6 +240,8 @@ export function GrowthWorkspace({
     }
   }, [dataset, start, end, channel]);
   const snapshot = computed?.snapshot;
+  const dashboardStart = start || snapshot?.scope.start;
+  const dashboardEnd = end || snapshot?.scope.end;
   const agentInput = useMemo<DiagnosisRequest | null>(
     () =>
       dataset
@@ -227,7 +278,7 @@ export function GrowthWorkspace({
     setSynthetic(true);
     setOptions({ assumePaid: false, assumeNoRefund: false });
     setAcceptRejected(false);
-    setView("import");
+    navigateWorkspace("import");
     setNotice("");
   }
   async function parseFile(
@@ -312,8 +363,18 @@ export function GrowthWorkspace({
     setStart("");
     setEnd("");
     setChannel("");
-    setView("dashboard");
+    navigateWorkspace("dashboard");
     setNotice("");
+  }
+  function navigateWorkspace(next: View) {
+    setWorkspaceMenuOpen(false);
+    setDashboardFiltersOpen(false);
+    setView(next);
+    if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+  }
+  function adjustDashboardFilters() {
+    navigateWorkspace("dashboard");
+    setDashboardFiltersOpen(true);
   }
   function clear() {
     request.current++;
@@ -347,87 +408,215 @@ export function GrowthWorkspace({
       const bValue = totalUnits(b.net_sales ?? b.gross_sales);
       return bValue > aValue ? 1 : bValue < aValue ? -1 : 0;
     });
+  const rankedChannels =
+    view === "dashboard" && snapshot ? ranked(snapshot.channels) : [];
+  const dashboardMetrics: Array<{
+    title: string;
+    value?: string | null;
+    text?: string;
+    note: string;
+  }> = snapshot
+    ? [
+        {
+          title: "扣退款销售额",
+          value: snapshot.totals.net_sales,
+          note: "成交金额 − 退款金额",
+        },
+        {
+          title: "有效订单数",
+          text:
+            snapshot.totals.order_count?.toLocaleString("zh-CN") ?? "不可确定",
+          note:
+            snapshot.totals.order_count === null
+              ? "缺少可靠订单ID，仅报告有效行数"
+              : "按订单ID去重；取消单已排除",
+        },
+        {
+          title: "贡献毛益",
+          value: snapshot.totals.contribution,
+          note: snapshot.totals.missing_fields.length
+            ? `缺少：${snapshot.totals.missing_fields.map(label).join("、")}`
+            : "扣退款销售额 − 全部可变成本",
+        },
+        {
+          title: "贡献率",
+          text:
+            snapshot.totals.contribution_rate === null
+              ? "不可计算"
+              : `${(Number(snapshot.totals.contribution_rate) * 100).toFixed(2)}%`,
+          note: "贡献毛益 ÷ 扣退款销售额",
+        },
+      ]
+    : [];
   const canConfirm =
     !!normalized?.result?.rows.length &&
     (!quality?.rejected_rows || acceptRejected);
+  const workspaceMenuButton = (
+    <button
+      type="button"
+      className="workspace-mobile-control"
+      aria-expanded={workspaceMenuOpen}
+      aria-controls="workspace-mobile-nav"
+      onClick={() => {
+        setWorkspaceMenuOpen(!workspaceMenuOpen);
+        setWorkspaceMenuHasMore(false);
+        setDashboardFiltersOpen(false);
+      }}
+    >
+      <Menu size={17} aria-hidden="true" />
+      工作台菜单
+    </button>
+  );
+  const workspaceMenu = (
+    <div
+      className="workspace-mobile-nav"
+      id="workspace-mobile-nav"
+      hidden={!workspaceMenuOpen}
+    >
+      <div
+        className="workspace-mobile-nav-scroll"
+        ref={workspaceMenuScroll}
+        onScroll={(event) =>
+          setWorkspaceMenuHasMore(hasMoreMenuEntries(event.currentTarget))
+        }
+      >
+        <WorkspaceNavigation current={view} onNavigate={navigateWorkspace} />
+      </div>
+      {workspaceMenuHasMore && (
+        <p className="workspace-mobile-nav-hint">
+          <ChevronDown size={14} aria-hidden="true" />
+          下滑查看更多
+        </p>
+      )}
+    </div>
+  );
 
   return (
-    <div className="growth-app">
+    <div
+      className={
+        view === "dashboard"
+          ? "growth-app growth-dashboard"
+          : view === "import"
+            ? "growth-app growth-import"
+            : "growth-app"
+      }
+    >
       <a className="skip-link" href="#main">
         跳至主要内容
       </a>
       <aside className="sidebar">
-        <a href="/" className="brand">
-          <span className="brand-mark">
-            <Leaf size={25} />
-          </span>
-          <span>
-            里下河<small>农企增长 Agent</small>
-          </span>
-        </a>
-        <div className="workspace-label">
-          经营工作台 <span>01</span>
-        </div>
-        <nav aria-label="工作台导航">
-          <button
-            className={view === "import" ? "active" : ""}
-            onClick={() => setView("import")}
-          >
-            <FileSpreadsheet size={18} />
-            数据导入
-            <ChevronRight size={14} />
-          </button>
-          <button
-            className={view === "dashboard" ? "active" : ""}
-            onClick={() => setView("dashboard")}
-          >
-            <BarChart3 size={18} />
-            经营看板
-            <ChevronRight size={14} />
-          </button>
-          {(["diagnose", "content", "knowledge", "report"] as const).map(
-            (item) => (
-              <button
-                key={item}
-                className={view === item ? "active" : ""}
-                onClick={() => setView(item)}
-              >
-                <Leaf size={18} />
-                {pages[item].label}
-                <ChevronRight size={14} />
-              </button>
-            ),
-          )}
-        </nav>
-        <div className="sidebar-rule" />
-        <div className="sidebar-bottom">
-          <ShieldCheck size={19} />
-          <p>
-            原始文件留在浏览器<small>诊断由本地服务核算汇总指标</small>
-          </p>
-        </div>
+        <WorkspaceBrand />
+        <WorkspaceNavigation current={view} onNavigate={navigateWorkspace} />
       </aside>
       <div className="main-shell">
-        <header className="topbar">
-          <span>
-            里下河 / <strong>{pages[view].label}</strong>
-          </span>
-          <span className="mode-badge">
-            <i />
-            本地计算模式
-          </span>
-        </header>
-        <main id="main">
-          <div className="page-heading">
-            <div>
-              <p className="eyebrow">LIXIAHE · GROWTH WORKSPACE</p>
-              <h1>{pages[view].title}</h1>
-              <p>{pages[view].description}</p>
+        {view !== "dashboard" && (
+          <header className="workspace-mobile-header">
+            <div className="workspace-mobile-header-row">
+              <WorkspaceBrand />
+              {workspaceMenuButton}
             </div>
-            <span className="phase-tag">
-              阶段 01—04 <Check size={13} />
-            </span>
-          </div>
+            {workspaceMenu}
+          </header>
+        )}
+        <main id="main">
+          {view === "dashboard" ? (
+            <header className="dashboard-heading">
+              <div className="dashboard-heading-row">
+                <h1>经营看板</h1>
+                {workspaceMenuButton}
+              </div>
+              {workspaceMenu}
+              {dataset && (
+                <>
+                  <div className="dashboard-scope">
+                    <div className="dashboard-scope-values" aria-live="polite">
+                      <span>
+                        {dashboardStart || dashboardEnd
+                          ? `${dashboardStart ?? "不限"} 至 ${dashboardEnd ?? "不限"}`
+                          : "当前范围无有效交易"}
+                      </span>
+                      <span>{channel || "全部渠道"}</span>
+                      <span
+                        className={
+                          dataset.synthetic ? "dashboard-demo-label" : undefined
+                        }
+                      >
+                        {dataset.synthetic ? "合成演示数据" : "本地文件"}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="workspace-mobile-control"
+                      aria-expanded={dashboardFiltersOpen}
+                      aria-controls="dashboard-filters"
+                      onClick={() => {
+                        setDashboardFiltersOpen(!dashboardFiltersOpen);
+                        setWorkspaceMenuOpen(false);
+                      }}
+                    >
+                      <SlidersHorizontal size={16} aria-hidden="true" />
+                      筛选
+                    </button>
+                  </div>
+                  <div
+                    id="dashboard-filters"
+                    className="filters dashboard-filters"
+                    data-expanded={dashboardFiltersOpen}
+                  >
+                    <label>
+                      开始日期
+                      <input
+                        type="date"
+                        value={start}
+                        onChange={(event) => setStart(event.target.value)}
+                      />
+                    </label>
+                    <label>
+                      结束日期
+                      <input
+                        type="date"
+                        value={end}
+                        onChange={(event) => setEnd(event.target.value)}
+                      />
+                    </label>
+                    <label>
+                      销售渠道
+                      <select
+                        value={channel}
+                        onChange={(event) => setChannel(event.target.value)}
+                      >
+                        <option value="">全部渠道</option>
+                        {[
+                          ...new Set(dataset.rows.map((row) => row.channel)),
+                        ].map((name) => (
+                          <option key={name}>{name}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={() => {
+                        setStart("");
+                        setEnd("");
+                        setChannel("");
+                      }}
+                    >
+                      重置筛选
+                    </button>
+                  </div>
+                </>
+              )}
+            </header>
+          ) : view === "import" ? (
+            <header className="import-heading">
+              <h1>{pages.import.title}</h1>
+            </header>
+          ) : (
+            <header className="page-heading">
+              <h1>{pages[view].title}</h1>
+            </header>
+          )}
           {notice && (
             <div role="status" className="info-banner">
               {notice}
@@ -435,308 +624,296 @@ export function GrowthWorkspace({
           )}
           {view === "import" ? (
             <>
-              <div className="steps" aria-label="导入流程">
-                <span className="current">
-                  <b>1</b>选择数据
-                </span>
-                <i />
-                <span className={raw ? "current" : ""}>
-                  <b>2</b>映射与检查
-                </span>
-                <i />
-                <span>
-                  <b>3</b>查看经营看板
-                </span>
-              </div>
-              {!raw && (
-                <section className="sample-section">
-                  <div className="section-title">
-                    <h2>先用一份样例试试</h2>
-                    <span className="tag amber">虚构商家 · 合成交易</span>
-                  </div>
-                  <div className="sample-grid">
-                    {SCENARIOS.map((scenario, index) => (
-                      <button
-                        className="sample-card"
-                        onClick={() => loadSample(scenario.key)}
-                        key={scenario.key}
-                      >
-                        <span className="sample-index">0{index + 1}</span>
-                        <h3>{scenario.title}</h3>
-                        <p>{scenario.description}</p>
-                        <span className="sample-link">
-                          载入960行样例 <ArrowRight size={15} />
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                  <p className="fineprint">
-                    演示店为虚构的“兴化特色农品演示店”。商品仅为品类示例，不代表取得产地或地理标志授权。数据范围：2026年9月1日—10月30日。
-                  </p>
-                </section>
-              )}
-              <section className="panel import-panel">
-                <div className="section-title">
-                  <h2>{raw ? "确认字段，让数据对得上" : "导入你的销售数据"}</h2>
+              <div className={raw ? "import-entry has-file" : "import-entry"}>
+                <section className="panel import-panel">
                   {raw && (
-                    <button className="text-button" onClick={clear}>
-                      <X size={14} />
-                      清除并重新导入
-                    </button>
+                    <div className="section-title">
+                      <h2>确认字段，让数据对得上</h2>
+                      <button className="text-button" onClick={clear}>
+                        <X size={14} />
+                        清除并重新导入
+                      </button>
+                    </div>
                   )}
-                </div>
-                <div className="privacy-note">
-                  <ShieldCheck size={16} />
-                  导入前请删除客户姓名、电话和地址。仅映射经营字段；API
-                  Key留空时不调用外部模型。
-                </div>
-                {!raw && (
-                  <label
-                    className={`dropzone ${busy ? "busy" : ""}`}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) => {
-                      event.preventDefault();
-                      if (event.dataTransfer.files[0])
-                        void parseFile(event.dataTransfer.files[0]);
-                    }}
-                  >
-                    <span className="upload-icon">
-                      <Upload size={25} />
-                    </span>
-                    <strong>
-                      {busy ? "正在解析，请稍候…" : "拖入表格，或点击选择文件"}
-                    </strong>
-                    <span>CSV / XLSX · 最大5MB · 最多10,000行</span>
-                    <input
-                      ref={fileInput}
-                      aria-label="选择销售数据文件"
-                      type="file"
-                      accept=".csv,.xlsx"
-                      disabled={busy}
-                      onChange={(event) => {
-                        const selected = event.target.files?.[0];
-                        if (selected) void parseFile(selected);
-                        event.target.value = "";
-                      }}
-                    />
-                  </label>
-                )}
-                <div className="file-tools">
-                  <button
-                    className="text-button"
-                    onClick={() =>
-                      download(rowsToCSV([], true), "里下河-标准模板.csv")
-                    }
-                  >
-                    <Download size={15} />
-                    下载CSV模板
-                  </button>
-                  <a
-                    className="text-button"
-                    href="/templates/lixiahe-template.xlsx"
-                    download
-                  >
-                    <Download size={15} />
-                    Excel模板
-                  </a>
-                  <button
-                    className="text-button"
-                    onClick={() =>
-                      download(
-                        rowsToCSV(generateDemo(), true),
-                        "里下河-合成样例.csv",
-                      )
-                    }
-                  >
-                    <Download size={15} />
-                    合成样例
-                  </button>
-                </div>
-                <details className="parse-settings">
-                  <summary>
-                    <SlidersHorizontal size={14} />
-                    编码与分隔符设置
-                  </summary>
-                  <div className="control-row">
-                    <label>
-                      CSV编码
-                      <select
-                        value={encoding}
-                        onChange={(event) => setEncoding(event.target.value)}
+                  {!raw && (
+                    <>
+                      <label
+                        className={`dropzone ${busy ? "busy" : ""}`}
+                        onDragOver={(event) => event.preventDefault()}
+                        onDrop={(event) => {
+                          event.preventDefault();
+                          if (event.dataTransfer.files[0])
+                            void parseFile(event.dataTransfer.files[0]);
+                        }}
                       >
-                        <option value="utf-8">UTF-8</option>
-                        <option value="gb18030">GB18030 / GBK</option>
-                        <option value="utf-16le">UTF-16 LE</option>
-                      </select>
-                    </label>
-                    <label>
-                      CSV分隔符
-                      <select
-                        value={delimiter}
-                        onChange={(event) => setDelimiter(event.target.value)}
-                      >
-                        <option value="">自动识别</option>
-                        <option value=",">逗号</option>
-                        <option value=";">分号</option>
-                        <option value={"\t"}>制表符</option>
-                      </select>
-                    </label>
-                    {file && (
+                        <span className="upload-action">
+                          <Upload size={17} aria-hidden="true" />
+                          {busy ? "正在解析文件…" : "选择销售数据文件"}
+                        </span>
+                        <span className="upload-formats">
+                          CSV / Excel · 最大 5 MB
+                        </span>
+                        <input
+                          ref={fileInput}
+                          aria-label="选择销售数据文件"
+                          type="file"
+                          accept=".csv,.xlsx"
+                          disabled={busy}
+                          onChange={(event) => {
+                            const selected = event.target.files?.[0];
+                            if (selected) void parseFile(selected);
+                            event.target.value = "";
+                          }}
+                        />
+                      </label>
+                    </>
+                  )}
+                  <details className="parse-settings">
+                    <summary>模板与导入选项</summary>
+                    <p className="import-field-note">
+                      必填：订单日期、SKU、商品名称、渠道、销量、单价。最多
+                      10,000 行。
+                    </p>
+                    <div className="privacy-note">
+                      <ShieldCheck size={16} aria-hidden="true" />
+                      <p>请删除姓名、电话和地址。原始文件仅在浏览器内解析。</p>
+                    </div>
+                    <div className="file-tools">
                       <button
-                        className="button secondary"
-                        disabled={busy}
+                        className="text-button"
                         onClick={() =>
-                          void parseFile(file, encoding, delimiter, sheet)
+                          download(rowsToCSV([], true), "里下河-标准模板.csv")
                         }
                       >
-                        按当前设置重新解析
+                        <Download size={15} />
+                        下载CSV模板
                       </button>
-                    )}
-                  </div>
-                </details>
-                {error && (
-                  <div className="error-banner" role="alert">
-                    <AlertCircle size={17} />
-                    {error}
-                  </div>
-                )}
-                {warnings.map((warning) => (
-                  <p className="warning-banner" key={warning}>
-                    {warning}
-                  </p>
-                ))}
-                {raw && (
-                  <>
-                    <div className="file-summary">
-                      <FileSpreadsheet size={22} />
-                      <div>
-                        <strong>{fileName}</strong>
-                        <small>
-                          {raw.rowCount.toLocaleString("zh-CN")} 行 ·{" "}
-                          {raw.headers.length} 列{" "}
-                          {synthetic ? "· 合成数据" : "· 用户选择的文件"}
-                        </small>
-                      </div>
-                      {sheets.length > 0 && (
-                        <label>
-                          工作表
-                          <select
-                            value={sheet}
-                            onChange={(event) =>
-                              void parseFile(
-                                file!,
-                                encoding,
-                                delimiter,
-                                event.target.value,
-                              )
-                            }
-                          >
-                            {sheets.map((name) => (
-                              <option key={name}>{name}</option>
-                            ))}
-                          </select>
-                        </label>
+                      <a
+                        className="text-button"
+                        href="/templates/lixiahe-template.xlsx"
+                        download
+                      >
+                        <Download size={15} />
+                        Excel模板
+                      </a>
+                      <button
+                        className="text-button"
+                        onClick={() =>
+                          download(
+                            rowsToCSV(generateDemo(), true),
+                            "里下河-合成样例.csv",
+                          )
+                        }
+                      >
+                        <Download size={15} />
+                        下载样例 CSV
+                      </button>
+                    </div>
+                    <div className="control-row">
+                      <label>
+                        CSV编码
+                        <select
+                          value={encoding}
+                          onChange={(event) => setEncoding(event.target.value)}
+                        >
+                          <option value="utf-8">UTF-8</option>
+                          <option value="gb18030">GB18030 / GBK</option>
+                          <option value="utf-16le">UTF-16 LE</option>
+                        </select>
+                      </label>
+                      <label>
+                        CSV分隔符
+                        <select
+                          value={delimiter}
+                          onChange={(event) => setDelimiter(event.target.value)}
+                        >
+                          <option value="">自动识别</option>
+                          <option value=",">逗号</option>
+                          <option value=";">分号</option>
+                          <option value={"\t"}>制表符</option>
+                        </select>
+                      </label>
+                      {file && (
+                        <button
+                          className="button secondary"
+                          disabled={busy}
+                          onClick={() =>
+                            void parseFile(file, encoding, delimiter, sheet)
+                          }
+                        >
+                          按当前设置重新解析
+                        </button>
                       )}
                     </div>
-                    <div className="mapping-grid">
-                      {FIELDS.map((field) => (
-                        <label key={field.key}>
-                          <span>
-                            {field.label}
-                            {field.required && <b aria-label="必填"> *</b>}
-                          </span>
-                          <select
-                            aria-label={`映射${field.label}`}
-                            value={mapping[field.key] ?? ""}
+                  </details>
+                  {error && (
+                    <div className="error-banner" role="alert">
+                      <AlertCircle size={17} />
+                      {error}
+                    </div>
+                  )}
+                  {warnings.map((warning) => (
+                    <p className="warning-banner" key={warning}>
+                      {warning}
+                    </p>
+                  ))}
+                  {raw && (
+                    <>
+                      <div className="file-summary">
+                        <FileSpreadsheet size={22} />
+                        <div>
+                          <strong>{fileName}</strong>
+                          <small>
+                            {raw.rowCount.toLocaleString("zh-CN")} 行 ·{" "}
+                            {raw.headers.length} 列{" "}
+                            {synthetic ? "· 合成数据" : "· 用户选择的文件"}
+                          </small>
+                        </div>
+                        {sheets.length > 0 && (
+                          <label>
+                            工作表
+                            <select
+                              value={sheet}
+                              onChange={(event) =>
+                                void parseFile(
+                                  file!,
+                                  encoding,
+                                  delimiter,
+                                  event.target.value,
+                                )
+                              }
+                            >
+                              {sheets.map((name) => (
+                                <option key={name}>{name}</option>
+                              ))}
+                            </select>
+                          </label>
+                        )}
+                      </div>
+                      <div className="mapping-grid">
+                        {FIELDS.map((field) => (
+                          <label key={field.key}>
+                            <span>
+                              {field.label}
+                              {field.required && <b aria-label="必填"> *</b>}
+                            </span>
+                            <select
+                              aria-label={`映射${field.label}`}
+                              value={mapping[field.key] ?? ""}
+                              onChange={(event) => {
+                                setMapping({
+                                  ...mapping,
+                                  [field.key]: event.target.value || undefined,
+                                });
+                                setAcceptRejected(false);
+                              }}
+                            >
+                              <option value="">
+                                {field.required
+                                  ? "请选择源列"
+                                  : "未提供，保留未知"}
+                              </option>
+                              {raw.headers.map((header) => (
+                                <option key={header} value={header}>
+                                  {header}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        ))}
+                      </div>
+                      <div className="assumptions">
+                        <p>
+                          <strong>明确数据口径</strong>
+                          　填写该订单行的实际分摊费用。空白成本标为待补，0按已填成本计算。
+                        </p>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={options.assumePaid}
                             onChange={(event) => {
-                              setMapping({
-                                ...mapping,
-                                [field.key]: event.target.value || undefined,
+                              setOptions({
+                                ...options,
+                                assumePaid: event.target.checked,
                               });
                               setAcceptRejected(false);
                             }}
-                          >
-                            <option value="">
-                              {field.required
-                                ? "请选择源列"
-                                : "未提供，保留未知"}
-                            </option>
-                            {raw.headers.map((header) => (
-                              <option key={header} value={header}>
-                                {header}
-                              </option>
-                            ))}
-                          </select>
+                          />
+                          我确认：空白订单状态均为已支付
                         </label>
-                      ))}
-                    </div>
-                    <div className="assumptions">
-                      <p>
-                        <strong>明确数据口径</strong>
-                        　费用必须是该订单行的实际分摊金额，空白成本不会自动按0计算。
-                      </p>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={options.assumePaid}
-                          onChange={(event) => {
-                            setOptions({
-                              ...options,
-                              assumePaid: event.target.checked,
-                            });
-                            setAcceptRejected(false);
-                          }}
-                        />
-                        我确认：空白订单状态均为已支付
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={options.assumeNoRefund}
-                          onChange={(event) => {
-                            setOptions({
-                              ...options,
-                              assumeNoRefund: event.target.checked,
-                            });
-                            setAcceptRejected(false);
-                          }}
-                        />
-                        我确认：空白退款金额代表没有退款
-                      </label>
-                    </div>
-                    {normalized?.error && (
-                      <div role="alert" className="error-banner">
-                        {normalized.error}
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={options.assumeNoRefund}
+                            onChange={(event) => {
+                              setOptions({
+                                ...options,
+                                assumeNoRefund: event.target.checked,
+                              });
+                              setAcceptRejected(false);
+                            }}
+                          />
+                          我确认：空白退款金额代表没有退款
+                        </label>
                       </div>
-                    )}
-                    {quality && <QualityPanel quality={quality} />}
-                    {!!quality?.rejected_rows && (
-                      <label className="reject-confirm">
-                        <input
-                          type="checkbox"
-                          checked={acceptRejected}
-                          onChange={(event) =>
-                            setAcceptRejected(event.target.checked)
-                          }
-                        />
-                        我已查看错误，确认剔除{quality.rejected_rows}行，仅分析
-                        {quality.valid_rows}行有效数据
-                      </label>
-                    )}
-                    <div className="confirm-row">
-                      <p>取消单会在分析时排除；退款单保留实际成本。</p>
-                      <button
-                        className="button primary"
-                        disabled={!canConfirm || busy}
-                        onClick={confirmImport}
-                      >
-                        确认导入，查看看板
-                        <ArrowRight size={17} />
-                      </button>
-                    </div>
-                  </>
+                      {normalized?.error && (
+                        <div role="alert" className="error-banner">
+                          {normalized.error}
+                        </div>
+                      )}
+                      {quality && <QualityPanel quality={quality} />}
+                      {!!quality?.rejected_rows && (
+                        <label className="reject-confirm">
+                          <input
+                            type="checkbox"
+                            checked={acceptRejected}
+                            onChange={(event) =>
+                              setAcceptRejected(event.target.checked)
+                            }
+                          />
+                          我已查看错误，确认剔除{quality.rejected_rows}
+                          行，仅分析
+                          {quality.valid_rows}行有效数据
+                        </label>
+                      )}
+                      <div className="confirm-row">
+                        <p>取消单会在分析时排除；退款单保留实际成本。</p>
+                        <button
+                          className="button primary"
+                          disabled={!canConfirm || busy}
+                          onClick={confirmImport}
+                        >
+                          确认导入，查看看板
+                          <ArrowRight size={17} />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </section>
+                {!raw && (
+                  <section
+                    className="import-samples"
+                    aria-labelledby="import-samples-title"
+                  >
+                    <h2 id="import-samples-title">使用演示样例</h2>
+                    <p className="import-sample-note">虚构商家 · 合成交易</p>
+                    <ul className="import-sample-list">
+                      {SCENARIOS.map((scenario) => (
+                        <li key={scenario.key}>
+                          <button
+                            type="button"
+                            aria-label={`载入样例：${scenario.title}`}
+                            onClick={() => loadSample(scenario.key)}
+                          >
+                            <span>{scenario.title}</span>
+                            <ArrowRight size={17} aria-hidden="true" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
                 )}
-              </section>
+              </div>
               {raw && (
                 <section className="panel">
                   <div className="section-title">
@@ -803,419 +980,380 @@ export function GrowthWorkspace({
               )}
             </>
           ) : view !== "dashboard" ? null : !dataset ? (
-            <section className="panel empty-state">
-              <BarChart3 size={40} />
-              <h2>看板从一份数据开始</h2>
-              <p>先导入销售表，或载入合成样例，再确认字段与口径。</p>
-              <button
-                className="button primary"
-                onClick={() => setView("import")}
-              >
-                去导入数据
-                <ArrowRight size={17} />
-              </button>
-            </section>
+            <WorkspaceEmptyState
+              title="还没有销售数据"
+              primary={{
+                label: "导入销售数据",
+                onClick: () => navigateWorkspace("import"),
+              }}
+              secondary={{
+                label: "使用演示样例",
+                onClick: () => loadSample("normal"),
+              }}
+            />
           ) : (
             <>
-              <div className="dataset-strip">
-                <div>
-                  <FileSpreadsheet size={20} />
-                  <strong>{dataset.fileName}</strong>
-                  <span
-                    className={`tag ${dataset.synthetic ? "amber" : "green"}`}
-                  >
-                    {dataset.synthetic ? "合成数据 · 非真实交易" : "本地文件"}
-                  </span>
-                </div>
-                <button
-                  className="text-button"
-                  onClick={() => setView("import")}
-                >
-                  修改映射与口径
-                  <ArrowRight size={14} />
-                </button>
-                <button
-                  className="button primary"
-                  onClick={() => setView("diagnose")}
-                >
-                  进入经营诊断
-                  <ArrowRight size={15} />
-                </button>
-              </div>
-              <div className="filters">
-                <label>
-                  开始日期
-                  <input
-                    type="date"
-                    value={start}
-                    onChange={(event) => setStart(event.target.value)}
-                  />
-                </label>
-                <span className="filter-separator">—</span>
-                <label>
-                  结束日期
-                  <input
-                    type="date"
-                    value={end}
-                    onChange={(event) => setEnd(event.target.value)}
-                  />
-                </label>
-                <label>
-                  销售渠道
-                  <select
-                    value={channel}
-                    onChange={(event) => setChannel(event.target.value)}
-                  >
-                    <option value="">全部渠道</option>
-                    {[...new Set(dataset.rows.map((row) => row.channel))].map(
-                      (name) => (
-                        <option key={name}>{name}</option>
-                      ),
-                    )}
-                  </select>
-                </label>
-                <button
-                  className="text-button"
-                  onClick={() => {
-                    setStart("");
-                    setEnd("");
-                    setChannel("");
-                  }}
-                >
-                  重置筛选
-                </button>
-              </div>
               {computed?.error && (
                 <div role="alert" className="error-banner">
                   {computed.error}
                 </div>
               )}
-              {snapshot && (
-                <>
-                  <div className="scope-line">
-                    <span>
-                      {snapshot.scope.start && snapshot.scope.end
-                        ? `${snapshot.scope.start} 至 ${snapshot.scope.end}`
-                        : "当前筛选范围没有有效交易"}
-                    </span>
-                    <span>
-                      已排除{snapshot.scope.cancelled}行取消单 ·{" "}
-                      {snapshot.totals.line_count}行参与计算
-                    </span>
-                  </div>
-                  <div className="kpi-grid">
-                    <MetricCard
-                      title="扣退款销售额"
-                      value={snapshot.totals.net_sales}
-                      note="成交金额 − 退款金额；非结算到账"
-                    />
-                    <MetricCard
-                      title="有效订单数"
-                      text={
-                        snapshot.totals.order_count?.toLocaleString("zh-CN") ??
-                        "不可确定"
-                      }
-                      note={
-                        snapshot.totals.order_count === null
-                          ? "缺少可靠订单ID，仅报告有效行数"
-                          : "按订单ID去重；取消单已排除"
-                      }
-                    />
-                    <MetricCard
-                      title="贡献毛益"
-                      value={snapshot.totals.contribution}
-                      note={
-                        snapshot.totals.missing_fields.length
-                          ? `缺少：${snapshot.totals.missing_fields.map(label).join("、")}`
-                          : "扣退款销售额 − 全部可变成本；非净利润"
-                      }
-                    />
-                    <MetricCard
-                      title="贡献率"
-                      text={
-                        snapshot.totals.contribution_rate === null
-                          ? "不可计算"
-                          : `${(Number(snapshot.totals.contribution_rate) * 100).toFixed(2)}%`
-                      }
-                      note="贡献毛益 ÷ 扣退款销售额"
-                    />
-                  </div>
-                  <div className="submetrics">
-                    <span>
-                      商品成交额 <b>¥{money(snapshot.totals.gross_sales)}</b>
-                    </span>
-                    <span>
-                      已知退款 <b>¥{money(snapshot.totals.known_refunds)}</b>
-                    </span>
-                    <span>
-                      销量 <b>{snapshot.totals.quantity} 件</b>
-                    </span>
-                    <span>
-                      {snapshot.totals.order_count === null
-                        ? "行均金额"
-                        : "客单价"}{" "}
-                      <b>
-                        {snapshot.totals.net_sales === null
-                          ? "数据不足"
-                          : `¥${money(snapshot.totals.order_count === null ? snapshot.totals.average_line_value : snapshot.totals.average_order_value)}`}
-                      </b>
-                    </span>
-                  </div>
-                  {!!snapshot.quality.duplicate_order_ids.length && (
-                    <div className="warning-banner">
-                      当前有{snapshot.quality.duplicate_order_ids.length}
-                      个重复订单ID：可能为多商品行或重复导出。金额未擅自去重，请核对。
+              {snapshot && !snapshot.totals.line_count ? (
+                <WorkspaceEmptyState
+                  title="当前范围没有有效交易"
+                  primary={{
+                    label: "调整统计范围",
+                    onClick: adjustDashboardFilters,
+                  }}
+                />
+              ) : (
+                snapshot && (
+                  <>
+                    <div className="kpi-grid">
+                      {dashboardMetrics.map((metric) => (
+                        <MetricCard key={metric.title} {...metric} />
+                      ))}
                     </div>
-                  )}
-                  <div className="chart-grid">
-                    <section className="panel">
-                      <div className="section-title">
-                        <div>
-                          <h2>销售趋势</h2>
-                          <p>扣退款销售额 · 元</p>
-                        </div>
-                        <span className="tag green">按日汇总</span>
-                      </div>
-                      {snapshot.daily.length &&
-                      snapshot.totals.net_sales !== null ? (
-                        <div
-                          className="chart-wrap"
-                          role="img"
-                          aria-label="每日扣退款销售额趋势，精确数据见汇总表"
-                        >
-                          <ResponsiveContainer width="100%" height={245}>
-                            <AreaChart
-                              data={snapshot.daily.map((group) => ({
-                                date: group.key.slice(5),
-                                amount: Number(group.net_sales),
-                              }))}
-                              margin={{
-                                top: 12,
-                                right: 10,
-                                left: 8,
-                                bottom: 0,
-                              }}
-                            >
-                              <CartesianGrid
-                                vertical={false}
-                                stroke="#e7ece7"
-                              />
-                              <XAxis
-                                dataKey="date"
-                                tickLine={false}
-                                axisLine={false}
-                                minTickGap={35}
-                                tick={{ fontSize: 11, fill: "#758175" }}
-                              />
-                              <YAxis
-                                tickFormatter={shortNumber}
-                                tickLine={false}
-                                axisLine={false}
-                                width={46}
-                                tick={{ fontSize: 11, fill: "#758175" }}
-                              />
-                              <Tooltip
-                                formatter={(value) => [
-                                  `¥${money(String(value))}`,
-                                  "销售额",
-                                ]}
-                              />
-                              <Area
-                                dataKey="amount"
-                                stroke="#28644d"
-                                fill="#e0eee6"
-                                strokeWidth={2}
-                                isAnimationActive={false}
-                              />
-                            </AreaChart>
-                          </ResponsiveContainer>
-                        </div>
-                      ) : (
-                        <div className="chart-empty">
-                          {snapshot.totals.net_sales === null
-                            ? "退款数据不完整，无法展示扣退款趋势。"
-                            : "当前范围没有数据。"}
-                        </div>
-                      )}
-                      <div className="chart-foot">
-                        最近7日对比前7日：
-                        {snapshot.comparison.status === "new"
-                          ? "新产生，不计算百分比"
-                          : snapshot.comparison.status === "comparable"
-                            ? `${(Number(snapshot.comparison.value) * 100).toFixed(2)}%`
-                            : "数据不足 / 不可比较"}
-                        <small>
-                          {snapshot.comparison.prior_start}—
-                          {snapshot.comparison.prior_end} →{" "}
-                          {snapshot.comparison.current_start}—
-                          {snapshot.comparison.current_end}
-                        </small>
-                      </div>
-                    </section>
-                    <section className="panel">
-                      <div className="section-title">
-                        <div>
-                          <h2>渠道贡献对照</h2>
-                          <p>销售额与贡献毛益 · 元</p>
-                        </div>
-                      </div>
-                      {snapshot.channels.length ? (
-                        <div
-                          className="chart-wrap"
-                          role="img"
-                          aria-label="渠道销售额与贡献毛益对照，精确数据见下表"
-                        >
-                          <ResponsiveContainer width="100%" height={245}>
-                            <BarChart
-                              data={ranked(snapshot.channels).map((group) => ({
-                                name: group.key,
-                                sales:
-                                  group.net_sales === null
-                                    ? null
-                                    : Number(group.net_sales),
-                                contribution:
-                                  group.contribution === null
-                                    ? null
-                                    : Number(group.contribution),
-                              }))}
-                              margin={{
-                                top: 12,
-                                right: 10,
-                                left: 8,
-                                bottom: 0,
-                              }}
-                            >
-                              <CartesianGrid
-                                vertical={false}
-                                stroke="#e7ece7"
-                              />
-                              <XAxis
-                                dataKey="name"
-                                tickLine={false}
-                                axisLine={false}
-                                tick={{ fontSize: 11 }}
-                              />
-                              <YAxis
-                                tickFormatter={shortNumber}
-                                tickLine={false}
-                                axisLine={false}
-                                width={46}
-                                tick={{ fontSize: 11 }}
-                              />
-                              <Tooltip
-                                formatter={(value, name) => [
-                                  `¥${money(String(value))}`,
-                                  name === "sales"
-                                    ? "扣退款销售额"
-                                    : "贡献毛益",
-                                ]}
-                              />
-                              <Bar
-                                dataKey="sales"
-                                fill="#2d6b50"
-                                radius={[3, 3, 0, 0]}
-                                isAnimationActive={false}
-                              />
-                              <Bar
-                                dataKey="contribution"
-                                fill="#b5cdb4"
-                                radius={[3, 3, 0, 0]}
-                                isAnimationActive={false}
-                              />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        </div>
-                      ) : (
-                        <div className="chart-empty">当前范围没有数据。</div>
-                      )}
-                      <div className="legend">
-                        <span>
-                          <i />
-                          扣退款销售额
-                        </span>
-                        <span>
-                          <i />
-                          贡献毛益
-                        </span>
-                      </div>
-                    </section>
-                  </div>
-                  <div className="rank-grid">
-                    <GroupTable
-                      title="渠道表现"
-                      groups={ranked(snapshot.channels)}
-                    />
-                    <GroupTable
-                      title="商品表现"
-                      groups={ranked(snapshot.skus)}
-                    />
-                  </div>
-                  <details className="panel methodology">
-                    <summary>查看计算口径与数据限制</summary>
-                    <ul>
-                      <li>
-                        贡献毛益 = 扣退款销售额 − 数量×单位成本 − 运费 − 平台费
-                        − 广告费。不包含固定成本、税费，不是净利润。
-                      </li>
-                      <li>
-                        任何一项成本缺失，该汇总组的贡献毛益均不可得。明确填写的0是已知成本，空白代表未知。
-                      </li>
-                      <li>
-                        金额采用BigInt定点十进制计算，乘积保留16位小数，展示时四舍五入到分。图表转换成数值仅用于绘制。
-                      </li>
-                      <li>
-                        订单ID重复仅用于提示与订单计数；多行商品金额照常计入。请自行确认重复导出并预先分摊订单费用。
-                      </li>
-                      <li>
-                        按订单日期归属退款，不按退款发生日期计算现金流。日期筛选包含起止两日；最近7日比较需要完整14日覆盖。
-                      </li>
-                      <li>
-                        样例为合成数据，不能用作真实经营成果；商品名称不证明产地认证或地理标志授权。
-                      </li>
-                    </ul>
-                  </details>
-                  <section className="panel">
-                    <div className="section-title">
-                      <h2>数据与复核</h2>
-                      <button
-                        className="text-button"
-                        onClick={() => setShowSource(!showSource)}
-                      >
-                        {showSource ? "收起" : "查看"}导入质量
-                      </button>
-                    </div>
-                    <p className="fineprint">
-                      经营报告采用当前筛选范围，可先导出数据摘要，也可附上诊断和营销草稿。
-                    </p>
-                    {showSource && <QualityPanel quality={dataset.quality} />}
-                    <div className="file-tools">
-                      <button
-                        className="text-button"
-                        onClick={() => setView("report")}
-                      >
-                        <ArrowRight size={15} />
-                        查看经营报告
-                      </button>
-                      <button
-                        className="text-button"
-                        onClick={() =>
-                          download(
-                            JSON.stringify(snapshot, null, 2),
-                            "里下河-指标快照.json",
-                            "application/json",
+                    <details className="metric-definitions">
+                      <summary>指标口径</summary>
+                      <dl>
+                        {dashboardMetrics
+                          .filter(
+                            (metric) =>
+                              metric.value !== null &&
+                              metric.text !== "不可计算" &&
+                              metric.text !== "不可确定",
                           )
-                        }
-                      >
-                        <Download size={15} />
-                        下载指标快照
-                      </button>
-                      <button className="text-button" onClick={clear}>
-                        <X size={15} />
-                        清除本次会话
-                      </button>
+                          .map((metric) => (
+                            <div key={metric.title}>
+                              <dt>{metric.title}</dt>
+                              <dd>{metric.note}</dd>
+                            </div>
+                          ))}
+                      </dl>
+                    </details>
+                    <p className="dashboard-count">
+                      {snapshot.totals.line_count
+                        ? `已排除${snapshot.scope.cancelled}行取消单 · ${snapshot.totals.line_count}行参与计算`
+                        : "当前筛选范围没有有效交易"}
+                    </p>
+                    <div className="submetrics">
+                      <span>
+                        商品成交额 <b>¥{money(snapshot.totals.gross_sales)}</b>
+                      </span>
+                      <span>
+                        已知退款 <b>¥{money(snapshot.totals.known_refunds)}</b>
+                      </span>
+                      <span>
+                        销量 <b>{snapshot.totals.quantity} 件</b>
+                      </span>
+                      <span>
+                        {snapshot.totals.order_count === null
+                          ? "行均金额"
+                          : "客单价"}{" "}
+                        <b>
+                          {snapshot.totals.net_sales === null
+                            ? "数据不足"
+                            : `¥${money(snapshot.totals.order_count === null ? snapshot.totals.average_line_value : snapshot.totals.average_order_value)}`}
+                        </b>
+                      </span>
                     </div>
-                  </section>
-                </>
+                    {!!snapshot.quality.duplicate_order_ids.length && (
+                      <div className="warning-banner">
+                        当前有{snapshot.quality.duplicate_order_ids.length}
+                        个重复订单ID：可能为多商品行或重复导出。金额未擅自去重，请核对。
+                      </div>
+                    )}
+                    <section className="dashboard-next" aria-label="下一步">
+                      <button
+                        className="button primary"
+                        onClick={() => navigateWorkspace("diagnose")}
+                      >
+                        进入经营诊断
+                        <ArrowRight size={16} aria-hidden="true" />
+                      </button>
+                    </section>
+                    <div className="chart-grid">
+                      <section className="panel">
+                        <div className="section-title">
+                          <div>
+                            <h2>销售趋势</h2>
+                            <p>扣退款销售额 · 元</p>
+                          </div>
+                        </div>
+                        {snapshot.daily.length &&
+                        snapshot.totals.net_sales !== null ? (
+                          <div
+                            className="chart-wrap"
+                            role="img"
+                            aria-label="每日扣退款销售额趋势，精确数据见汇总表"
+                          >
+                            <ResponsiveContainer width="100%" height={245}>
+                              <AreaChart
+                                data={snapshot.daily.map((group) => ({
+                                  date: group.key.slice(5),
+                                  amount: Number(group.net_sales),
+                                }))}
+                                margin={{
+                                  top: 12,
+                                  right: 10,
+                                  left: 8,
+                                  bottom: 0,
+                                }}
+                              >
+                                <CartesianGrid
+                                  vertical={false}
+                                  stroke="#e7ece7"
+                                />
+                                <XAxis
+                                  dataKey="date"
+                                  tickLine={false}
+                                  axisLine={false}
+                                  minTickGap={35}
+                                  tick={{ fontSize: 11, fill: "#758175" }}
+                                />
+                                <YAxis
+                                  tickFormatter={shortNumber}
+                                  tickLine={false}
+                                  axisLine={false}
+                                  width={46}
+                                  tick={{ fontSize: 11, fill: "#758175" }}
+                                />
+                                <Tooltip
+                                  formatter={(value) => [
+                                    `¥${money(String(value))}`,
+                                    "销售额",
+                                  ]}
+                                />
+                                <Area
+                                  dataKey="amount"
+                                  stroke="#28644d"
+                                  fill="#e0eee6"
+                                  strokeWidth={2}
+                                  isAnimationActive={false}
+                                />
+                              </AreaChart>
+                            </ResponsiveContainer>
+                          </div>
+                        ) : (
+                          <div className="chart-empty">
+                            {snapshot.totals.net_sales === null
+                              ? "退款数据不完整，无法展示扣退款趋势。"
+                              : "当前范围没有数据。"}
+                          </div>
+                        )}
+                        <div className="chart-foot">
+                          最近7日对比前7日：
+                          {snapshot.comparison.status === "new"
+                            ? "新产生，不计算百分比"
+                            : snapshot.comparison.status === "comparable"
+                              ? `${(Number(snapshot.comparison.value) * 100).toFixed(2)}%`
+                              : "数据不足 / 不可比较"}
+                          <small>
+                            {snapshot.comparison.prior_start}—
+                            {snapshot.comparison.prior_end} →{" "}
+                            {snapshot.comparison.current_start}—
+                            {snapshot.comparison.current_end}
+                          </small>
+                        </div>
+                      </section>
+                      <section className="panel dashboard-channel-chart">
+                        <div className="section-title">
+                          <div>
+                            <h2>渠道贡献对照</h2>
+                            <p>销售额与贡献毛益 · 元</p>
+                          </div>
+                        </div>
+                        {snapshot.channels.length ? (
+                          <div
+                            className="chart-wrap"
+                            role="img"
+                            aria-label="渠道销售额与贡献毛益对照，精确数据见下表"
+                          >
+                            <ResponsiveContainer width="100%" height={245}>
+                              <BarChart
+                                data={rankedChannels.map((group) => ({
+                                  name: group.key,
+                                  sales:
+                                    group.net_sales === null
+                                      ? null
+                                      : Number(group.net_sales),
+                                  contribution:
+                                    group.contribution === null
+                                      ? null
+                                      : Number(group.contribution),
+                                }))}
+                                margin={{
+                                  top: 12,
+                                  right: 10,
+                                  left: 8,
+                                  bottom: 0,
+                                }}
+                              >
+                                <CartesianGrid
+                                  vertical={false}
+                                  stroke="#e7ece7"
+                                />
+                                <XAxis
+                                  dataKey="name"
+                                  tickLine={false}
+                                  axisLine={false}
+                                  tick={{ fontSize: 11 }}
+                                />
+                                <YAxis
+                                  tickFormatter={shortNumber}
+                                  tickLine={false}
+                                  axisLine={false}
+                                  width={46}
+                                  tick={{ fontSize: 11 }}
+                                />
+                                <Tooltip
+                                  formatter={(value, name) => [
+                                    `¥${money(String(value))}`,
+                                    name === "sales"
+                                      ? "扣退款销售额"
+                                      : "贡献毛益",
+                                  ]}
+                                />
+                                <Bar
+                                  dataKey="sales"
+                                  fill="#2d6b50"
+                                  radius={[3, 3, 0, 0]}
+                                  isAnimationActive={false}
+                                />
+                                <Bar
+                                  dataKey="contribution"
+                                  fill="#b5cdb4"
+                                  radius={[3, 3, 0, 0]}
+                                  isAnimationActive={false}
+                                />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        ) : (
+                          <div className="chart-empty">当前范围没有数据。</div>
+                        )}
+                        <div className="legend">
+                          <span>
+                            <i />
+                            扣退款销售额
+                          </span>
+                          <span>
+                            <i />
+                            贡献毛益
+                          </span>
+                        </div>
+                        {rankedChannels.length > 0 && (
+                          <table className="dashboard-channel-values">
+                            <thead>
+                              <tr>
+                                <th scope="col">渠道</th>
+                                <th scope="col">贡献毛益</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {rankedChannels.map(
+                                ({ key, name, contribution }) => (
+                                  <tr key={key}>
+                                    <th scope="row">{name}</th>
+                                    <td
+                                      className={
+                                        contribution?.startsWith("-")
+                                          ? "negative"
+                                          : undefined
+                                      }
+                                    >
+                                      {contribution === null
+                                        ? "数据不足"
+                                        : `¥${money(contribution)}`}
+                                    </td>
+                                  </tr>
+                                ),
+                              )}
+                            </tbody>
+                          </table>
+                        )}
+                      </section>
+                    </div>
+                    <div className="rank-grid">
+                      <GroupTable title="渠道表现" groups={rankedChannels} />
+                      <GroupTable
+                        title="商品表现"
+                        groups={ranked(snapshot.skus)}
+                      />
+                    </div>
+                    <details className="panel methodology">
+                      <summary>查看计算口径</summary>
+                      <ul>
+                        <li>
+                          贡献毛益 = 扣退款销售额 − 数量×单位成本 − 运费 −
+                          平台费 − 广告费。
+                        </li>
+                        <li>
+                          成本字段完整时显示贡献毛益，缺失时显示“数据不足”。明确填写的0是已知成本，空白为待补字段。
+                        </li>
+                        <li>
+                          金额采用BigInt定点十进制计算，乘积保留16位小数，展示时四舍五入到分。图表转换成数值仅用于绘制。
+                        </li>
+                        <li>
+                          订单ID重复仅用于提示与订单计数；多行商品金额照常计入。请自行确认重复导出并预先分摊订单费用。
+                        </li>
+                        <li>
+                          退款归入订单日期。日期筛选包含起止两日，最近7日比较使用完整14日数据。
+                        </li>
+                      </ul>
+                    </details>
+                    <section className="panel">
+                      <div className="section-title">
+                        <h2>数据与复核</h2>
+                        <button
+                          className="text-button"
+                          onClick={() => setShowSource(!showSource)}
+                        >
+                          {showSource ? "收起" : "查看"}导入质量
+                        </button>
+                      </div>
+                      <p className="fineprint">数据文件 {dataset.fileName}</p>
+                      <p className="fineprint">
+                        经营报告采用当前筛选范围，可先导出数据摘要，也可附上诊断和营销草稿。
+                      </p>
+                      {showSource && <QualityPanel quality={dataset.quality} />}
+                      <div className="file-tools">
+                        <button
+                          className="text-button"
+                          onClick={() => navigateWorkspace("import")}
+                        >
+                          修改映射与口径
+                          <ArrowRight size={14} />
+                        </button>
+                        <button
+                          className="text-button"
+                          onClick={() => setView("report")}
+                        >
+                          <ArrowRight size={15} />
+                          查看经营报告
+                        </button>
+                        <button
+                          className="text-button"
+                          onClick={() =>
+                            download(
+                              JSON.stringify(snapshot, null, 2),
+                              "里下河-指标快照.json",
+                              "application/json",
+                            )
+                          }
+                        >
+                          <Download size={15} />
+                          下载指标快照
+                        </button>
+                        <button className="text-button" onClick={clear}>
+                          <X size={15} />
+                          清除本次会话
+                        </button>
+                      </div>
+                    </section>
+                  </>
+                )
               )}
             </>
           )}
@@ -1231,22 +1369,10 @@ export function GrowthWorkspace({
             input={agentInput}
             snapshot={snapshot ?? null}
             quality={dataset?.quality}
-            onNavigate={setView}
+            onNavigate={navigateWorkspace}
+            onAdjustFilters={adjustDashboardFilters}
+            onUseSample={() => loadSample("normal")}
           />
-          <footer className="app-footer">
-            <span>里下河 · 让经营建议有据可依</span>
-            <span>
-              基于{" "}
-              <a
-                href="https://github.com/maxgfr/csv-ai-analyzer"
-                target="_blank"
-                rel="noreferrer"
-              >
-                CSV AI Analyzer
-              </a>{" "}
-              改造 · MIT
-            </span>
-          </footer>
         </main>
       </div>
     </div>
@@ -1283,7 +1409,9 @@ function MetricCard({
             </>
           ))}
       </strong>
-      <p>{note}</p>
+      {(value === null || text === "不可计算" || text === "不可确定") && (
+        <p>{note}</p>
+      )}
     </section>
   );
 }

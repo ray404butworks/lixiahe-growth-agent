@@ -1,18 +1,28 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
+
+async function openMobileControl(page: Page, name: string) {
+  const control = page.getByRole("button", { name, exact: true });
+  if (await control.isVisible()) await control.click();
+}
+
 test("合成样例、映射、指标、筛选、清除", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: /01 正常经营/ }).click();
+  await page.getByRole("button", { name: /载入样例：正常经营/ }).click();
   await page.getByRole("button", { name: /确认导入，查看看板/ }).click();
   await expect(page.getByText("225,436.00", { exact: true })).toBeVisible();
-  await page.getByLabel("销售渠道", { exact: true }).selectOption("微信私域");
+  await openMobileControl(page, "筛选");
+  await page
+    .getByRole("combobox", { name: "销售渠道", exact: true })
+    .selectOption("微信私域");
   await expect(page.locator(".kpi").first()).toContainText("69,540.00");
   await page.getByRole("button", { name: "重置筛选" }).click();
   await expect(page.locator(".kpi").first()).toContainText("225,436.00");
   await page.getByRole("button", { name: "清除本次会话" }).click();
+  await openMobileControl(page, "工作台菜单");
   await page.getByRole("button", { name: "经营看板" }).click();
   await expect(
-    page.getByRole("heading", { name: "看板从一份数据开始" }),
+    page.getByRole("heading", { name: "还没有销售数据" }),
   ).toBeVisible();
 });
 test("XLSX样例导入", async ({ page }) => {
@@ -30,9 +40,9 @@ test("XLSX样例导入", async ({ page }) => {
 // 阶段三待真实浏览器复验；当前已由组件测试与HTTP检查覆盖。
 test("无Key诊断、事实核对、营销草稿与七日清单", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: /01 正常经营/ }).click();
+  await page.getByRole("button", { name: /载入样例：正常经营/ }).click();
   await page.getByRole("button", { name: /确认导入，查看看板/ }).click();
-  await page.getByRole("button", { name: "经营诊断", exact: true }).click();
+  await page.getByRole("button", { name: "进入经营诊断", exact: true }).click();
   await page.getByRole("button", { name: "一键经营诊断" }).click();
   await expect(page.getByText("数据观察").first()).toBeVisible();
   await expect(
@@ -78,13 +88,19 @@ test("无Key诊断、事实核对、营销草稿与七日清单", async ({ page 
     page.getByRole("heading", { name: "里下河 · 经营复盘报告" }),
   ).toBeVisible();
   await page.emulateMedia({ media: "screen" });
+  await openMobileControl(page, "工作台菜单");
   await page.getByRole("button", { name: "营销内容", exact: true }).click();
   await page.getByLabel("商品规格", { exact: true }).fill("10kg");
   await expect(page.getByRole("heading", { name: "七日行动清单" })).toHaveCount(
     0,
   );
+  await openMobileControl(page, "工作台菜单");
   await page.getByRole("button", { name: "经营看板", exact: true }).click();
-  await page.getByLabel("销售渠道", { exact: true }).selectOption("微信私域");
+  await openMobileControl(page, "筛选");
+  await page
+    .getByRole("combobox", { name: "销售渠道", exact: true })
+    .selectOption("微信私域");
+  await openMobileControl(page, "工作台菜单");
   await page.getByRole("button", { name: "经营报告", exact: true }).click();
   await expect(page.getByText(/当前筛选范围尚无诊断/)).toBeVisible();
   await expect(page.getByText(/人工复核版草稿/)).toHaveCount(0);

@@ -55,7 +55,7 @@ afterEach(() => {
 });
 function openDiagnosis() {
   render(<GrowthWorkspace />);
-  fireEvent.click(screen.getByRole("button", { name: /01 正常经营/ }));
+  fireEvent.click(screen.getByRole("button", { name: /载入样例：正常经营/ }));
   fireEvent.click(screen.getByRole("button", { name: /确认导入，查看看板/ }));
   fireEvent.click(screen.getByRole("button", { name: "经营诊断" }));
   fireEvent.click(screen.getByRole("button", { name: "一键经营诊断" }));
@@ -102,7 +102,7 @@ describe("阶段三用户流程（组件环境）", () => {
     render(<GrowthWorkspace />);
     fireEvent.click(screen.getByRole("button", { name: "经营诊断" }));
     expect(
-      screen.getByRole("heading", { name: "诊断需要有效的经营数据" }),
+      screen.getByRole("heading", { name: "还没有销售数据" }),
     ).toBeTruthy();
   });
   it("无数据也能查看六张知识卡片", () => {
@@ -152,9 +152,7 @@ describe("阶段三用户流程（组件环境）", () => {
     fireEvent.change(screen.getByLabelText("销售渠道", { exact: true }), {
       target: { value: "微信私域" },
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "经营报告", exact: true }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: /^经营报告$/ }));
     expect(screen.getByText(/当前筛选范围尚无诊断/)).toBeTruthy();
     expect(screen.queryByText(/人工编辑后的商品文案/)).toBeNull();
   });
@@ -201,7 +199,7 @@ describe("阶段三用户流程（组件环境）", () => {
     fireEvent.click(screen.getByRole("button", { name: "清除并重新导入" }));
     fireEvent.click(screen.getByRole("button", { name: "经营诊断" }));
     expect(
-      screen.getByRole("heading", { name: "诊断需要有效的经营数据" }),
+      screen.getByRole("heading", { name: "还没有销售数据" }),
     ).toBeTruthy();
   });
 });

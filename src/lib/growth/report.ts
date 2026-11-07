@@ -119,9 +119,7 @@ export function buildReport(source: ReportSource) {
           ],
         ],
       },
-      paragraphs: [
-        "取消单不计入指标。退款按订单日期归属。贡献毛益未扣固定成本，不能用于表示净利润。",
-      ],
+      paragraphs: ["退款按订单日期归属。贡献毛益 = 扣退款销售额 − 可变成本。"],
     },
     {
       title: "渠道表现",
@@ -136,7 +134,7 @@ export function buildReport(source: ReportSource) {
     {
       title: "经营诊断",
       paragraphs: diagnosis
-        ? [`生成方式：${mode(diagnosis.meta.mode)}。`, diagnosis.summary]
+        ? [`生成方式：${mode(diagnosis.meta.mode)}。`]
         : ["当前筛选范围尚无诊断。可先导出数据摘要，或完成诊断后再导出。"],
     },
   ];
@@ -150,7 +148,6 @@ export function buildReport(source: ReportSource) {
             `证据键：${item.evidence_metric_keys.join("、")}`,
             `待验证假设：${item.hypothesis}`,
             `下一步：${item.action}`,
-            `预期与边界：${item.expected_effect} ${item.risk_note}`,
             ...(item.knowledge_ids.length
               ? [`知识来源：${item.knowledge_ids.join("、")}`]
               : []),
@@ -175,7 +172,6 @@ export function buildReport(source: ReportSource) {
       {
         title: "营销草稿 · 发布前复核",
         paragraphs: [
-          draft.label,
           `生成方式：${mode(draft.meta.mode)}${edited ? "，已人工编辑，仍待复核" : ""}。`,
           `短视频标题：${draft.text.video_title}`,
           ...draft.text.video_segments.map(
@@ -184,7 +180,6 @@ export function buildReport(source: ReportSource) {
           ),
           `商品文案\n${draft.text.product_copy}`,
           `社交文案\n${draft.text.social_copy}`,
-          ...draft.warnings,
         ],
       },
     );

@@ -42,7 +42,7 @@ export function rulesFromSnapshot(
       title: "先补齐成本与退款口径",
       priority: "P1",
       evidence_metric_keys: ["totals.gross_sales", "totals.line_count"],
-      hypothesis: "部分经营字段不完整，目前不能据此判断完整贡献毛益。",
+      hypothesis: "部分经营字段尚待补齐。",
       action:
         "逐项核对进货成本、行分摊费用和退款金额；明确没有发生的费用再填写零。",
       expected_effect: "提高指标可解释性，经营收益仍待验证。",
@@ -82,8 +82,7 @@ export function rulesFromSnapshot(
         `sku.${encodeURIComponent(refundSku.key)}.gross_sales`,
         `sku.${encodeURIComponent(refundSku.key)}.known_refunds`,
       ],
-      hypothesis:
-        "可能存在物流、商品预期或售后解释差异，金额本身不能证明原因。",
+      hypothesis: "可能存在物流、商品预期或售后解释差异。",
       action:
         "按授权的去标识化售后记录归类原因，核对发货说明和商品页面，再观察后续变化。",
       expected_effect: "找到需要验证的退款原因，效果以后续样本衡量。",

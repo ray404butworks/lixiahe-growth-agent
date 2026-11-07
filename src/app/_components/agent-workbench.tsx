@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   BookOpen,
-  CheckCircle2,
   Copy,
   FileText,
   RefreshCw,
@@ -13,11 +12,7 @@ import {
 import { KNOWLEDGE_CARDS, type KnowledgeCard } from "~/lib/knowledge/cards";
 import { requestDiagnosis, requestMarketing } from "~/lib/agent/client";
 import type { Diagnosis } from "~/lib/agent/rules";
-import {
-  AI_DRAFT_LABEL,
-  factViolations,
-  type MarketingDraft,
-} from "~/lib/agent/content";
+import { factViolations, type MarketingDraft } from "~/lib/agent/content";
 import { snapshotId } from "~/lib/agent/evidence";
 import type {
   DiagnosisRequest,
@@ -28,6 +23,7 @@ import type { MetricSnapshot } from "~/lib/growth/metrics";
 import type { QualityReport } from "~/lib/growth/import";
 import { FIELDS } from "~/lib/growth/contract";
 import { GrowthReportView } from "./growth-report";
+import { WorkspaceEmptyState } from "./workspace-empty-state";
 type AgentView = "diagnose" | "content" | "knowledge" | "report";
 type Props = {
   view: AgentView | null;
@@ -35,6 +31,8 @@ type Props = {
   snapshot: MetricSnapshot | null;
   quality?: QualityReport;
   onNavigate: (view: AgentView | "import") => void;
+  onAdjustFilters: () => void;
+  onUseSample: () => void;
 };
 const reasons: Record<FallbackReason, string> = {
   key_missing: "服务端API Key留空，当前使用离线规则。",
@@ -91,6 +89,8 @@ export function AgentWorkbench({
   snapshot,
   quality,
   onNavigate,
+  onAdjustFilters,
+  onUseSample,
 }: Props) {
   const [diagnosis, setDiagnosis] = useState<Diagnosis | null>(null);
   const [draft, setDraft] = useState<MarketingDraft | null>(null);
@@ -261,6 +261,19 @@ export function AgentWorkbench({
     }
   }
   if (view === null) return null;
+  const dataEmptyState = input ? (
+    <WorkspaceEmptyState
+      title={snapshot ? "当前范围没有有效交易" : "统计范围有误"}
+      primary={{ label: "调整统计范围", onClick: onAdjustFilters }}
+    />
+  ) : (
+    <WorkspaceEmptyState
+      title="还没有销售数据"
+      primary={{ label: "导入销售数据", onClick: () => onNavigate("import") }}
+      secondary={{ label: "使用演示样例", onClick: onUseSample }}
+    />
+  );
+  if (view === "report" && !eligible) return dataEmptyState;
   if (view === "report")
     return (
       <GrowthReportView
@@ -286,8 +299,7 @@ export function AgentWorkbench({
       <section className="knowledge-page">
         <div className="section-title">
           <div>
-            <h2>本土知识，有出处才能用</h2>
-            <p>六张公开来源卡片 · 核验日期2026-11-05</p>
+            <p>核验日期：2026-11-05</p>
           </div>
           <label className="knowledge-filter">
             品类
@@ -301,10 +313,6 @@ export function AgentWorkbench({
             </select>
           </label>
         </div>
-        <div className="info-banner">
-          <ShieldCheck size={17} />
-          已核验的是公开页面的事实摘要；不代表本系统已审核商家认证、授权或实际履约能力。
-        </div>
         <div className="knowledge-grid">
           {KNOWLEDGE_CARDS.filter(
             (card) =>
@@ -317,17 +325,16 @@ export function AgentWorkbench({
         </div>
       </section>
     );
-  if (!eligible)
+  if (!eligible) return dataEmptyState;
+  if (view === "content" && !diagnosis)
     return (
-      <section className="panel empty-state">
-        <Sparkles size={38} />
-        <h2>诊断需要有效的经营数据</h2>
-        <p>请先导入数据，或调整看板筛选范围。</p>
-        <button className="button primary" onClick={() => onNavigate("import")}>
-          去导入数据
-          <ArrowRight size={16} />
-        </button>
-      </section>
+      <WorkspaceEmptyState
+        title="先完成经营诊断"
+        primary={{
+          label: "进入经营诊断",
+          onClick: () => onNavigate("diagnose"),
+        }}
+      />
     );
   return (
     <div className="agent-page">
@@ -337,11 +344,7 @@ export function AgentWorkbench({
         >
           {diagnosis?.meta.mode === "model" ? "模型模式" : "离线规则模式"}
         </span>
-        <span>
-          {modelReady
-            ? "服务端模型已配置；是否调用由本次授权决定。"
-            : "服务端API Key暂留空，规则链路可完整体验。"}
-        </span>
+        <span>{modelReady ? "模型已配置" : "模型未配置"}</span>
         <small>
           {snapshot?.scope.start} — {snapshot?.scope.end} ·{" "}
           {input?.synthetic ? "合成交易" : "本地导入数据"}
@@ -349,7 +352,7 @@ export function AgentWorkbench({
       </div>
       <div className="privacy-note">
         <ShieldCheck size={16} />
-        诊断在本地服务重新计算指标。启用模型时仅发送汇总指标、建议上下文和来源摘要，不发送订单ID或原始文件。
+        本地服务计算经营指标。模型接收汇总指标、建议上下文和来源摘要。
       </div>
       <label className="model-consent">
         <input
@@ -358,7 +361,7 @@ export function AgentWorkbench({
           disabled={!modelReady || busy}
           onChange={(event) => setAllowModel(event.target.checked)}
         />
-        本次允许已配置模型处理汇总指标（默认关闭）
+        本次允许模型处理汇总指标
       </label>
       {error && (
         <div role="alert" className="error-banner">
@@ -373,11 +376,6 @@ export function AgentWorkbench({
       {view === "diagnose" ? (
         <>
           <section className="panel diagnosis-intro">
-            <div>
-              <p className="eyebrow">EVIDENCE BEFORE ADVICE</p>
-              <h2>先说看到了什么，再说可以怎么做。</h2>
-              <p>每条建议都附指标依据，可能原因与实际结果分开。</p>
-            </div>
             <button
               className="button primary"
               disabled={busy}
@@ -398,7 +396,6 @@ export function AgentWorkbench({
                   {diagnosis.meta.attempts} 次
                 </small>
               </div>
-              <p className="agent-summary">{diagnosis.summary}</p>
               <div className="recommendations">
                 {diagnosis.recommendations.map((item) => (
                   <article className="panel recommendation" key={item.id}>
@@ -446,14 +443,6 @@ export function AgentWorkbench({
                         <dt>下一步动作</dt>
                         <dd>{item.action}</dd>
                       </div>
-                      <div>
-                        <dt>预期与边界</dt>
-                        <dd>
-                          {item.expected_effect}
-                          <br />
-                          {item.risk_note}
-                        </dd>
-                      </div>
                     </dl>
                     <div className="source-links">
                       <BookOpen size={13} />
@@ -485,315 +474,298 @@ export function AgentWorkbench({
                     </span>
                   ))}
                 </div>
-                <p className="fineprint">
-                  这些缺口会限制经营判断；规则建议不代表已经完成原因归因。
-                </p>
               </div>
             </>
           )}
         </>
-      ) : !diagnosis ? (
-        <section className="panel empty-state">
-          <FileText size={38} />
-          <h2>先选择一条有依据的建议</h2>
-          <p>完成经营诊断后，再确认商品事实并生成内容。</p>
-          <button
-            className="button primary"
-            onClick={() => onNavigate("diagnose")}
-          >
-            去经营诊断
-            <ArrowRight size={16} />
-          </button>
-        </section>
       ) : (
-        <>
-          <section className="panel facts-panel">
-            <div className="section-title">
-              <div>
-                <h2>先核对商品事实</h2>
-                <p>没有勾选确认的内容只会保留“待核对”占位。</p>
-              </div>
-              <span className="tag amber">人工确认</span>
-            </div>
-            <div className="facts-top">
-              <label>
-                依据建议
-                <select
-                  value={selected}
-                  onChange={(event) => {
-                    chooseRecommendation(event.target.value);
-                    setDraft(null);
-                  }}
-                >
-                  {diagnosis.recommendations.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.title}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                选择商品
-                <select
-                  value={facts.sku}
-                  onChange={(event) => chooseProduct(event.target.value)}
-                >
-                  <option value="">请选择SKU</option>
-                  {snapshot?.skus.map((item) => (
-                    <option key={item.key} value={item.key}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="fact-field">
-              <label>
-                商品名称
-                <input
-                  maxLength={80}
-                  value={facts.name}
-                  onChange={(event) => {
-                    updateFacts({
-                      ...facts,
-                      name: event.target.value,
-                      name_confirmed: false,
-                    });
-                    setDraft(null);
-                  }}
-                />
-              </label>
-              <label className="fact-check">
-                <input
-                  type="checkbox"
-                  checked={facts.name_confirmed}
-                  onChange={(event) => {
-                    updateFacts({
-                      ...facts,
-                      name_confirmed: event.target.checked,
-                    });
-                    setDraft(null);
-                  }}
-                />
-                我已核对商品名称
-              </label>
-            </div>
-            <div className="facts-grid">
-              {(Object.keys(factNames) as (keyof typeof factNames)[]).map(
-                (key) => (
-                  <div className="fact-field" key={key}>
-                    <label>
-                      {factNames[key]}
-                      <input
-                        maxLength={160}
-                        value={facts[key].value}
-                        placeholder="留空则生成待核对占位"
-                        onChange={(event) => {
-                          updateFacts({
-                            ...facts,
-                            [key]: {
-                              value: event.target.value,
-                              confirmed: false,
-                            },
-                          });
-                          setDraft(null);
-                        }}
-                      />
-                    </label>
-                    <label className="fact-check">
-                      <input
-                        type="checkbox"
-                        checked={facts[key].confirmed}
-                        onChange={(event) => {
-                          updateFacts({
-                            ...facts,
-                            [key]: {
-                              ...facts[key],
-                              confirmed: event.target.checked,
-                            },
-                          });
-                          setDraft(null);
-                        }}
-                      />
-                      我已核对{factNames[key]}
-                    </label>
-                  </div>
-                ),
-              )}
-            </div>
-            <p className="fineprint">
-              本阶段不审核认证材料。受保护名称、认证、功效和极限宣传断言不能因勾选而自动通过。
-            </p>
-            {!!violations.length && (
-              <div role="alert" className="warning-banner">
-                请修改含认证、功效、受保护名称或指令内容的字段：
-                {violations
-                  .map((key) =>
-                    key === "name"
-                      ? "商品名称"
-                      : factNames[key as keyof typeof factNames],
-                  )
-                  .join("、")}
-              </div>
-            )}
-            <div className="confirm-row">
-              <p>将生成短视频脚本、商品文案、社交文案与七日行动清单。</p>
-              <button
-                className="button primary"
-                disabled={
-                  !facts.sku || !facts.name || busy || !!violations.length
-                }
-                onClick={() => void generate()}
-              >
-                <Sparkles size={16} />
-                {busy ? "正在生成草稿…" : "生成营销草稿"}
-              </button>
-            </div>
-          </section>
-          {draft && (
-            <section className="draft-output">
+        diagnosis && (
+          <>
+            <section className="panel facts-panel">
               <div className="section-title">
                 <div>
-                  <h2>营销草稿，交给你最后把关</h2>
-                  <p>{AI_DRAFT_LABEL}</p>
+                  <h2>核对商品事实</h2>
+                  <p>勾选已核对的商品信息。</p>
                 </div>
-                <button
-                  className="button secondary"
-                  onClick={() => onNavigate("report")}
-                >
-                  <FileText size={16} />
-                  查看经营报告
-                </button>
-                <button
-                  className="button secondary"
-                  onClick={() => void copy()}
-                >
-                  <Copy size={16} />
-                  复制全部草稿
-                </button>
               </div>
-              <div className="info-banner">
-                {draft.meta.mode === "model"
-                  ? "模型草稿已通过结构与事实占位符检查。"
-                  : reasons[draft.meta.fallback_reason ?? "key_missing"]}
-                {edited && (
-                  <span className="tag amber">已人工编辑 · 仍待复核</span>
-                )}
-              </div>
-              <div className="missing-fields">
-                {draft.missing_facts.map((key) => (
-                  <span key={key}>
-                    待核对：
-                    {key === "name"
-                      ? "商品名称"
-                      : factNames[key as keyof typeof factNames]}
-                  </span>
-                ))}
-              </div>
-              <article className="panel draft-card">
-                <h3>短视频脚本 · 建议约30秒</h3>
+              <div className="facts-top">
                 <label>
-                  视频标题
+                  依据建议
+                  <select
+                    value={selected}
+                    onChange={(event) => {
+                      chooseRecommendation(event.target.value);
+                      setDraft(null);
+                    }}
+                  >
+                    {diagnosis.recommendations.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  选择商品
+                  <select
+                    value={facts.sku}
+                    onChange={(event) => chooseProduct(event.target.value)}
+                  >
+                    <option value="">请选择SKU</option>
+                    {snapshot?.skus.map((item) => (
+                      <option key={item.key} value={item.key}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <div className="fact-field">
+                <label>
+                  商品名称
                   <input
-                    value={draft.text.video_title}
-                    onChange={(event) =>
-                      editText("video_title", event.target.value)
-                    }
+                    maxLength={80}
+                    value={facts.name}
+                    onChange={(event) => {
+                      updateFacts({
+                        ...facts,
+                        name: event.target.value,
+                        name_confirmed: false,
+                      });
+                      setDraft(null);
+                    }}
                   />
                 </label>
-                {draft.text.video_segments.map((segment, index) => (
-                  <div className="script-segment" key={index}>
-                    <span>
-                      {
-                        [
-                          "0—8秒 · 开场",
-                          "8—22秒 · 商品细节",
-                          "22—30秒 · 咨询引导",
-                        ][index]
-                      }
-                    </span>
-                    <label>
-                      画面{index + 1}
-                      <textarea
-                        value={segment.visual}
-                        onChange={(event) =>
-                          editSegment(index, "visual", event.target.value)
-                        }
-                      />
-                    </label>
-                    <label>
-                      口播{index + 1}
-                      <textarea
-                        value={segment.narration}
-                        onChange={(event) =>
-                          editSegment(index, "narration", event.target.value)
-                        }
-                      />
-                    </label>
-                  </div>
-                ))}
-              </article>
-              <div className="copy-grid">
-                {(["product_copy", "social_copy"] as const).map((key) => (
-                  <article className="panel draft-card" key={key}>
-                    <h3>{key === "product_copy" ? "商品文案" : "社交文案"}</h3>
-                    <label>
-                      {key === "product_copy" ? "编辑商品文案" : "编辑社交文案"}
-                      <textarea
-                        rows={8}
-                        value={draft.text[key]}
-                        onChange={(event) => editText(key, event.target.value)}
-                      />
-                    </label>
-                  </article>
-                ))}
+                <label className="fact-check">
+                  <input
+                    type="checkbox"
+                    checked={facts.name_confirmed}
+                    onChange={(event) => {
+                      updateFacts({
+                        ...facts,
+                        name_confirmed: event.target.checked,
+                      });
+                      setDraft(null);
+                    }}
+                  />
+                  我已核对商品名称
+                </label>
               </div>
-              <section className="panel">
-                <div className="section-title">
-                  <h2>七日行动清单</h2>
-                  <span className="tag green">从建议走向复盘</span>
+              <div className="facts-grid">
+                {(Object.keys(factNames) as (keyof typeof factNames)[]).map(
+                  (key) => (
+                    <div className="fact-field" key={key}>
+                      <label>
+                        {factNames[key]}
+                        <input
+                          maxLength={160}
+                          value={facts[key].value}
+                          placeholder="留空则生成待核对占位"
+                          onChange={(event) => {
+                            updateFacts({
+                              ...facts,
+                              [key]: {
+                                value: event.target.value,
+                                confirmed: false,
+                              },
+                            });
+                            setDraft(null);
+                          }}
+                        />
+                      </label>
+                      <label className="fact-check">
+                        <input
+                          type="checkbox"
+                          checked={facts[key].confirmed}
+                          onChange={(event) => {
+                            updateFacts({
+                              ...facts,
+                              [key]: {
+                                ...facts[key],
+                                confirmed: event.target.checked,
+                              },
+                            });
+                            setDraft(null);
+                          }}
+                        />
+                        我已核对{factNames[key]}
+                      </label>
+                    </div>
+                  ),
+                )}
+              </div>
+
+              {!!violations.length && (
+                <div role="alert" className="warning-banner">
+                  请修改含认证、功效、受保护名称或指令内容的字段：
+                  {violations
+                    .map((key) =>
+                      key === "name"
+                        ? "商品名称"
+                        : factNames[key as keyof typeof factNames],
+                    )
+                    .join("、")}
                 </div>
-                <ol className="action-week">
-                  {draft.plan.map((day) => (
-                    <li key={day.day}>
-                      <b>DAY {String(day.day).padStart(2, "0")}</b>
-                      <span>
-                        {day.action}
-                        <small>
-                          依据：
-                          {day.evidence_metric_keys
-                            .map((key) => diagnosis.evidence[key]?.label ?? key)
-                            .join("；")}
-                        </small>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </section>
-              <section className="panel">
-                <h2>发布前核对</h2>
-                {draft.warnings.map((warning) => (
-                  <p className="review-line" key={warning}>
-                    <CheckCircle2 size={14} />
-                    {warning}
-                  </p>
-                ))}
-                <div className="source-links">
-                  <BookOpen size={14} />
-                  {draft.knowledge_ids.map((id) => (
-                    <button
-                      className="text-button"
-                      key={id}
-                      onClick={() => onNavigate("knowledge")}
-                    >
-                      {id}
-                    </button>
-                  ))}
-                </div>
-              </section>
+              )}
+              <div className="confirm-row">
+                <p>将生成短视频脚本、商品文案、社交文案与七日行动清单。</p>
+                <button
+                  className="button primary"
+                  disabled={
+                    !facts.sku || !facts.name || busy || !!violations.length
+                  }
+                  onClick={() => void generate()}
+                >
+                  <Sparkles size={16} />
+                  {busy ? "正在生成草稿…" : "生成营销草稿"}
+                </button>
+              </div>
             </section>
-          )}
-        </>
+            {draft && (
+              <section className="draft-output">
+                <div className="section-title">
+                  <div>
+                    <h2>营销草稿</h2>
+                  </div>
+                  <button
+                    className="button secondary"
+                    onClick={() => onNavigate("report")}
+                  >
+                    <FileText size={16} />
+                    查看经营报告
+                  </button>
+                  <button
+                    className="button secondary"
+                    onClick={() => void copy()}
+                  >
+                    <Copy size={16} />
+                    复制全部草稿
+                  </button>
+                </div>
+                <div className="info-banner">
+                  {draft.meta.mode === "model"
+                    ? "模型草稿已通过结构与事实占位符检查。"
+                    : reasons[draft.meta.fallback_reason ?? "key_missing"]}
+                  {edited && (
+                    <span className="tag amber">已人工编辑 · 仍待复核</span>
+                  )}
+                </div>
+                <div className="missing-fields">
+                  {draft.missing_facts.map((key) => (
+                    <span key={key}>
+                      待核对：
+                      {key === "name"
+                        ? "商品名称"
+                        : factNames[key as keyof typeof factNames]}
+                    </span>
+                  ))}
+                </div>
+                <article className="panel draft-card">
+                  <h3>短视频脚本 · 建议约30秒</h3>
+                  <label>
+                    视频标题
+                    <input
+                      value={draft.text.video_title}
+                      onChange={(event) =>
+                        editText("video_title", event.target.value)
+                      }
+                    />
+                  </label>
+                  {draft.text.video_segments.map((segment, index) => (
+                    <div className="script-segment" key={index}>
+                      <span>
+                        {
+                          [
+                            "0—8秒 · 开场",
+                            "8—22秒 · 商品细节",
+                            "22—30秒 · 咨询引导",
+                          ][index]
+                        }
+                      </span>
+                      <label>
+                        画面{index + 1}
+                        <textarea
+                          value={segment.visual}
+                          onChange={(event) =>
+                            editSegment(index, "visual", event.target.value)
+                          }
+                        />
+                      </label>
+                      <label>
+                        口播{index + 1}
+                        <textarea
+                          value={segment.narration}
+                          onChange={(event) =>
+                            editSegment(index, "narration", event.target.value)
+                          }
+                        />
+                      </label>
+                    </div>
+                  ))}
+                </article>
+                <div className="copy-grid">
+                  {(["product_copy", "social_copy"] as const).map((key) => (
+                    <article className="panel draft-card" key={key}>
+                      <h3>
+                        {key === "product_copy" ? "商品文案" : "社交文案"}
+                      </h3>
+                      <label>
+                        {key === "product_copy"
+                          ? "编辑商品文案"
+                          : "编辑社交文案"}
+                        <textarea
+                          rows={8}
+                          value={draft.text[key]}
+                          onChange={(event) =>
+                            editText(key, event.target.value)
+                          }
+                        />
+                      </label>
+                    </article>
+                  ))}
+                </div>
+                <section className="panel">
+                  <div className="section-title">
+                    <h2>七日行动清单</h2>
+                    <span className="tag green">从建议走向复盘</span>
+                  </div>
+                  <ol className="action-week">
+                    {draft.plan.map((day) => (
+                      <li key={day.day}>
+                        <b>DAY {String(day.day).padStart(2, "0")}</b>
+                        <span>
+                          {day.action}
+                          <small>
+                            依据：
+                            {day.evidence_metric_keys
+                              .map(
+                                (key) => diagnosis.evidence[key]?.label ?? key,
+                              )
+                              .join("；")}
+                          </small>
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+                <section className="panel">
+                  <div className="source-links">
+                    <BookOpen size={14} />
+                    {draft.knowledge_ids.map((id) => (
+                      <button
+                        className="text-button"
+                        key={id}
+                        onClick={() => onNavigate("knowledge")}
+                      >
+                        {id}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              </section>
+            )}
+          </>
+        )
       )}
     </div>
   );
@@ -807,9 +779,6 @@ function KnowledgeCardView({ card }: { card: KnowledgeCard }) {
       </div>
       <h2>{card.title}</h2>
       <p>{card.summary}</p>
-      <div className="knowledge-constraint">
-        {card.claim_constraints.join(" ")}
-      </div>
       <dl>
         <div>
           <dt>发布机构</dt>

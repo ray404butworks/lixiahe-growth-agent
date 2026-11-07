@@ -10,6 +10,7 @@ import {
   type ReportSource,
 } from "~/lib/growth/report";
 import "~/styles/report.css";
+import { WorkspaceEmptyState } from "./workspace-empty-state";
 
 export function GrowthReportView({
   source,
@@ -22,13 +23,10 @@ export function GrowthReportView({
 }) {
   if (!source?.snapshot.totals.line_count)
     return (
-      <section className="panel empty-state">
-        <h2>先导入数据，再生成经营报告</h2>
-        <p>报告使用当前看板的日期与渠道筛选。请导入数据或调整空的筛选范围。</p>
-        <button className="button primary" onClick={onImport}>
-          去导入数据
-        </button>
-      </section>
+      <WorkspaceEmptyState
+        title="还没有销售数据"
+        primary={{ label: "导入销售数据", onClick: onImport }}
+      />
     );
 
   const report = buildReport(source);

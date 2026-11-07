@@ -1,0 +1,203 @@
+.growth-app {
+  --paper: #fafaf8;
+  --ink: #252824;
+  --muted: #646a62;
+  --line: #e3e5df;
+  --green: #28533b;
+  --surface: #ffffff;
+  --subtle: #f1f3ee;
+  letter-spacing: 0;
+}
+
+.growth-app .sidebar {
+  width: 216px;
+  padding: 28px 16px;
+  gap: 32px;
+  background: #f3f4ef;
+  overflow-y: auto;
+}
+
+.growth-app .brand {
+  gap: 9px;
+  padding-inline: 8px;
+  font-weight: 600;
+  line-height: 1.4;
+  font-family: inherit;
+  font-size: 19px;
+  letter-spacing: 0;
+}
+
+.growth-app .brand-mark {
+  height: 30px;
+  width: 30px;
+  flex: 0 0 auto;
+  background: transparent;
+}
+
+.growth-app .brand-mark img {
+  width: 27px;
+  height: 27px;
+}
+
+.growth-app .workspace-navigation {
+  display: grid;
+  gap: 4px;
+}
+
+.growth-app .workspace-navigation button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  text-align: left;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.growth-app .workspace-navigation button svg:last-child {
+  flex-shrink: 0;
+  margin-left: 0;
+}
+
+.growth-app .workspace-navigation button:hover {
+  background: #e9ece5;
+  color: var(--ink);
+}
+
+.growth-app .workspace-navigation button.active {
+  background: #e3e9df;
+  color: var(--green);
+  font-weight: 600;
+}
+
+.growth-app .main-shell {
+  margin-left: 216px;
+}
+.growth-app main {
+  padding: 36px 40px;
+}
+.growth-app .page-heading {
+  margin-bottom: 28px;
+}
+.growth-app .page-heading h1 {
+  font-weight: 650;
+  line-height: 1.4;
+  font-family: inherit;
+  font-size: 28px;
+  letter-spacing: -0.025em;
+}
+.growth-app .panel {
+  background: var(--surface);
+  border-radius: 6px;
+}
+
+.growth-app .diagnosis-intro {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.growth-app .workspace-mobile-control,
+.growth-app .workspace-mobile-nav,
+.growth-app .workspace-mobile-header {
+  display: none;
+}
+
+.growth-app .workspace-empty {
+  width: 100%;
+  max-width: 560px;
+  padding: 28px 0;
+  border-top: 1px solid var(--line);
+}
+.growth-app .workspace-empty h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+.growth-app .workspace-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  margin-top: 20px;
+}
+.growth-app .workspace-empty-actions > button {
+  min-height: 44px;
+}
+
+@media (max-width: 700px) {
+  .growth-app .sidebar {
+    display: none;
+  }
+  .growth-app .main-shell {
+    margin-left: 0;
+  }
+  .growth-app main {
+    padding: 20px 16px;
+  }
+  .growth-app .page-heading {
+    margin-bottom: 20px;
+  }
+  .growth-app .page-heading h1 {
+    font-size: 25px;
+  }
+  .growth-app .workspace-mobile-header {
+    display: block;
+    padding: 8px 16px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+  }
+  .growth-app .workspace-mobile-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .growth-app .workspace-mobile-header .brand {
+    padding: 0;
+  }
+  .growth-app .workspace-mobile-header .workspace-mobile-nav {
+    margin-top: 8px;
+  }
+  .growth-app .workspace-mobile-header .workspace-mobile-nav[hidden] {
+    margin-top: 0;
+  }
+  .growth-app .workspace-mobile-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 5px 8px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--ink);
+    font-size: 13px;
+  }
+  .growth-app .workspace-mobile-control[aria-expanded="true"] {
+    background: var(--subtle);
+  }
+  .growth-app .workspace-mobile-nav:not([hidden]) {
+    display: block;
+    border-top: 1px solid var(--line);
+  }
+  .growth-app .workspace-mobile-nav-scroll {
+    max-height: 52dvh;
+    overflow-y: auto;
+    padding-block: 8px;
+  }
+  .growth-app .workspace-mobile-nav-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding-block: 4px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 12px;
+  }
+}

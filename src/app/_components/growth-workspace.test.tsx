@@ -27,7 +27,7 @@ vi.mock("recharts", () => {
 });
 afterEach(cleanup);
 function sample() {
-  fireEvent.click(screen.getByRole("button", { name: /01 正常经营/ }));
+  fireEvent.click(screen.getByRole("button", { name: /载入样例：正常经营/ }));
 }
 function confirm() {
   fireEvent.click(screen.getByRole("button", { name: /确认导入，查看看板/ }));
@@ -54,7 +54,7 @@ describe("阶段一二交互组件验收（JSDOM，不替代真实浏览器图�
     ).toBeTruthy();
     confirm();
     expect(
-      screen.getByRole("heading", { name: "每一笔经营，都有依据。" }),
+      screen.getByRole("heading", { name: "经营看板", level: 1 }),
     ).toBeTruthy();
     expect(screen.getByText("225,436.00")).toBeTruthy();
     expect(screen.getByText("76,684.00")).toBeTruthy();
@@ -127,7 +127,50 @@ describe("阶段一二交互组件验收（JSDOM，不替代真实浏览器图�
       "开始日期不能晚于结束日期",
     );
     expect(screen.queryByText("225,436.00")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "经营诊断" }));
+    expect(screen.getByRole("heading", { name: "统计范围有误" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "调整统计范围" }));
+    expect(screen.getByRole("alert").textContent).toContain(
+      "开始日期不能晚于结束日期",
+    );
   });
+  it("空看板载入样例仍需核对并确认导入", () => {
+    render(<GrowthWorkspace initialView="dashboard" />);
+    fireEvent.click(screen.getByRole("button", { name: "使用演示样例" }));
+    expect(
+      screen.getByRole("heading", { name: "确认字段，让数据对得上" }),
+    ).toBeTruthy();
+    expect(screen.queryByText("225,436.00")).toBeNull();
+    confirm();
+    expect(screen.getByText("225,436.00")).toBeTruthy();
+  });
+  it.each(["经营诊断", "营销内容", "经营报告"])(
+    "%s的空范围返回筛选且保留原销售数据",
+    (view) => {
+      render(<GrowthWorkspace />);
+      sample();
+      confirm();
+      fireEvent.change(screen.getByLabelText("开始日期"), {
+        target: { value: "2027-01-01" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: view }));
+      expect(
+        screen.getByRole("heading", { name: "当前范围没有有效交易" }),
+      ).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "调整统计范围" }));
+      expect(
+        (screen.getByLabelText("开始日期") as HTMLInputElement).value,
+      ).toBe("2027-01-01");
+      expect(
+        screen
+          .getByLabelText("开始日期")
+          .closest(".dashboard-filters")
+          ?.getAttribute("data-expanded"),
+      ).toBe("true");
+      fireEvent.click(screen.getByRole("button", { name: "重置筛选" }));
+      expect(screen.getByText("225,436.00")).toBeTruthy();
+    },
+  );
   it("清除后数据不再可从看板访问", () => {
     render(<GrowthWorkspace />);
     sample();
@@ -135,7 +178,7 @@ describe("阶段一二交互组件验收（JSDOM，不替代真实浏览器图�
     fireEvent.click(screen.getByRole("button", { name: "清除本次会话" }));
     fireEvent.click(screen.getByRole("button", { name: "经营看板" }));
     expect(
-      screen.getByRole("heading", { name: "看板从一份数据开始" }),
+      screen.getByRole("heading", { name: "还没有销售数据" }),
     ).toBeTruthy();
   });
 });
