@@ -55,6 +55,7 @@ export interface AnalysisResult {
 
 // ============ Prompts ============
 
+/** 设置数据摘要请求的输出语言和结构。 */
 const summarySystemPrompt = (
   language?: string,
 ) => `You are a data analyst.${language ? ` Respond in ${language}.` : ""}
@@ -64,6 +65,7 @@ Analyze the provided CSV data summary and provide:
 2. 3-5 key insights or patterns you notice
 3. An assessment of data quality (completeness, consistency)`;
 
+/** 设置异常识别请求的输出语言、格式和判断要求。 */
 const anomalySystemPrompt = (
   language?: string,
 ) => `You are a data quality expert.${language ? ` Respond in ${language}.` : ""}
@@ -91,6 +93,7 @@ left out on purpose, and the summary statistics and group totals cover every row
 Never report the number of rows, missing or truncated rows, or totals that the
 rows provided do not add up to: report only problems in the values you see.`;
 
+/** 设置数据问答的语言和回答范围。 */
 const questionSystemPrompt = (language?: string) =>
   `You are a data analysis expert.${language ? ` Respond in ${language}.` : ""}
 
@@ -106,6 +109,7 @@ and the rows themselves, all of them or the first ones when the file is large.
 
 // ============ Helper ============
 
+/** 按 CSV 规则转义提示词中出现的表格单元格。 */
 function escapeCSVField(value: string): string {
   if (
     value.includes(",") ||
@@ -118,7 +122,9 @@ function escapeCSVField(value: string): string {
   return value;
 }
 
+/** 将抽样行变成带表头的 CSV，控制模型上下文大小。 */
 function buildSampleCSV(data: TabularData, maxRows = 50): string {
+  /** 裁剪过长的样例值再执行 CSV 转义。 */
   const cell = (value: string) => escapeCSVField(clipCell(value));
   const header = data.headers.map(cell).join(",");
   const rows = data.rows
@@ -134,9 +140,11 @@ export const CHAT_ROWS_MAX_CHARS = 20_000;
 /**
  * The rows sent with a chat question, as CSV under a heading saying which
  * ones: all of them, or the first rows that fit `maxChars`. Empty without rows.
+ * 根据数据量选择可放入问答上下文的行。
  */
 function rowsForChat(data: TabularData, maxChars: number): string {
   if (data.rows.length === 0 || maxChars <= 0) return "";
+  /** 将用于异常校验的样例值转换为安全的 CSV 字段。 */
   const cell = (value: string) => escapeCSVField(clipCell(value));
   const lines = [data.headers.map(cell).join(",")];
   let size = lines[0]!.length;
@@ -153,6 +161,7 @@ function rowsForChat(data: TabularData, maxChars: number): string {
  * The heading of the rows sent to the model. When they are a sample,
  * it says so: otherwise the model, told the dataset has more rows, reports the
  * sample itself as truncated data.
+ * 说明模型接收到的是全量数据还是抽样行。
  */
 function sampleHeading(data: TabularData, maxRows: number): string {
   const total = Math.max(data.rowCount, data.rows.length);
@@ -178,6 +187,7 @@ export const MAX_HISTORY_CHARS = 12_000;
 /**
  * Keep the most recent successful turns that fit the budget, oldest first.
  * Failed or empty answers are left out.
+ * 将有限的历史问答拼入模型上下文。
  */
 export function buildHistoryContext(
   history: ChatHistoryItem[],
@@ -226,6 +236,7 @@ export interface SummarizeDataOptions {
  * console.log(result.keyInsights);
  * console.log(result.dataQuality);
  * ```
+ * 让模型根据数据摘要和样例生成可读分析。
  */
 export async function summarizeData(
   options: SummarizeDataOptions,
@@ -282,6 +293,7 @@ export interface DetectAnomaliesOptions {
  * });
  * anomalies.forEach(a => console.log(`Row ${a.row}: ${a.issue}`));
  * ```
+ * 请求结构化异常信息，并检查返回字段是否存在于原表。
  */
 export async function detectAnomalies(
   options: DetectAnomaliesOptions,
@@ -346,6 +358,7 @@ export interface AskAboutDataOptions {
  * });
  * console.log(answer);
  * ```
+ * 发起一次数据问答并返回完整文本。
  */
 export async function askAboutData(
   options: AskAboutDataOptions,
@@ -405,6 +418,7 @@ export interface StreamAskAboutDataOptions extends Omit<
  *   onComplete: (full) => console.log("\nDone:", full.length, "chars"),
  * });
  * ```
+ * 启动流式数据问答，向调用方逐步提供模型输出。
  */
 export async function streamAskAboutData(
   options: StreamAskAboutDataOptions,
@@ -437,6 +451,7 @@ export async function streamAskAboutData(
       temperature,
       ...(signal && { abortSignal: signal }),
       ...(maxRetries !== undefined && { maxRetries }),
+      /** 记录流式请求错误，供结束时统一处理。 */
       onError: ({ error }) => {
         streamError = error instanceof Error ? error : new Error(String(error));
       },
@@ -500,6 +515,7 @@ export interface AnalyzeOptions {
  * // Render charts
  * <ChartDisplay data={myCSVData} charts={result.charts} />
  * ```
+ * 并行获取数据摘要、异常和图表建议，并共享取消信号。
  */
 export async function analyzeData(
   options: AnalyzeOptions,
@@ -521,6 +537,7 @@ export async function analyzeData(
 
   // The first failure cancels the sibling requests instead of letting them run on
   const controller = new AbortController();
+  /** 将外部取消信号传给并行分析使用的控制器。 */
   const forwardAbort = () => controller.abort(signal?.reason);
   if (signal?.aborted) forwardAbort();
   else signal?.addEventListener("abort", forwardAbort, { once: true });
@@ -532,6 +549,7 @@ export async function analyzeData(
     signal: controller.signal,
     maxRetries,
   };
+  /** 某项分析失败时取消其他任务，并继续抛出错误。 */
   const cancelOnFailure = <T>(promise: Promise<T>) =>
     promise.catch((error: unknown) => {
       controller.abort(error);
@@ -555,6 +573,7 @@ export async function analyzeData(
 
 // ============ Question Suggestions ============
 
+/** 指定后续问题生成的语言和内容范围。 */
 const questionsSystemPrompt = (
   language?: string,
 ) => `You are a data analysis expert.${language ? ` Respond in ${language}.` : ""}
@@ -616,6 +635,7 @@ export interface SuggestedQuestion {
  * // [comparison] Which product category generates the most revenue?
  * // [correlation] Is there a relationship between price and quantity sold?
  * ```
+ * 为当前表格生成可继续追问的问题。
  */
 export async function suggestQuestions(
   options: SuggestQuestionsOptions,

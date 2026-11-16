@@ -22,7 +22,7 @@ const handler = createAgentHandler({
 });
 const base = resolve(
   root,
-  existsSync(join(root, "preview")) ? "preview" : "out",
+  existsSync(join(root, "out", "index.html")) ? "out" : "preview",
 );
 const types = {
   ".html": "text/html;charset=utf-8",
@@ -32,13 +32,12 @@ const types = {
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon",
   ".png": "image/png",
-  ".woff2": "font/woff2",
-  ".ttf": "font/ttf",
   ".csv": "text/csv;charset=utf-8",
   ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 const port = Number(process.env.LIXIAHE_PORT ?? 8080);
 const host = process.env.LIXIAHE_HOST ?? "127.0.0.1";
+// 校验本机访问地址，并把 API 请求与构建后的静态页面分开处理。
 const server = createServer(async (request, response) => {
   try {
     const url = new URL(
@@ -87,6 +86,7 @@ const server = createServer(async (request, response) => {
 });
 server.requestTimeout = 75000;
 server.headersTimeout = 15000;
+// 把端口占用与其他启动错误显示为可操作的终端提示。
 server.on("error", (error) => {
   console.error(
     error.code === "EADDRINUSE"
@@ -95,6 +95,7 @@ server.on("error", (error) => {
   );
   process.exitCode = 1;
 });
+// 服务就绪后显示访问地址，Windows 下按配置打开浏览器。
 server.listen(port, host, () => {
   const url = `http://127.0.0.1:${port}`;
   console.log(`里下河阶段四已启动：${url} （关闭终端即停止）`);
@@ -107,5 +108,6 @@ server.listen(port, host, () => {
       () => {},
     );
 });
+// 收到终止信号时先关闭 HTTP 服务。
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => server.close(() => process.exit(0)));

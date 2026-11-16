@@ -21,12 +21,16 @@ export type ReportSource = {
   edited: boolean;
 };
 
+/** 格式化有值的金额，为缺失金额显示数据状态。 */
 const amount = (value: string | null) =>
   value === null ? "数据不足" : `¥${money(value)}`;
+/** 将贡献率的小数值转换为两位小数的百分比。 */
 const percent = (value: string | null) =>
   value === null ? "数据不足" : `${(Number(value) * 100).toFixed(2)}%`;
+/** 将生成模式转换成报告中的中文名称。 */
 const mode = (value: "model" | "rules") =>
   value === "model" ? "模型生成" : "离线规则";
+/** 为报告里空缺的表格单元格提供统一的状态文字。 */
 const display = (cell: Cell) => cell ?? "数据不足";
 const columns = [
   "有效订单行",
@@ -38,6 +42,7 @@ const columns = [
   "贡献毛益（元）",
   "贡献率",
 ];
+/** 按报告固定表头排列总体指标。 */
 const totalsRow = (totals: Totals): Cell[] => [
   totals.line_count,
   totals.order_count,
@@ -48,12 +53,14 @@ const totalsRow = (totals: Totals): Cell[] => [
   totals.contribution,
   totals.contribution_rate === null ? null : percent(totals.contribution_rate),
 ];
+/** 使用定点金额比较分组成交额，避免浮点排序误差。 */
 const ranked = (groups: Group[]) =>
   [...groups].sort((left, right) => {
     const l = totalUnits(left.gross_sales);
     const r = totalUnits(right.gross_sales);
     return l < r ? 1 : l > r ? -1 : 0;
   });
+/** 生成按成交额排序的渠道或商品摘要表。 */
 function summaryTable(groups: Group[], title: string): Table {
   return {
     headers: [title, "扣退款销售额", "贡献毛益", "贡献率"],
@@ -68,6 +75,7 @@ function summaryTable(groups: Group[], title: string): Table {
   };
 }
 
+/** 核对诊断、草稿和快照归属后，整理统一的报告内容。 */
 export function buildReport(source: ReportSource) {
   const { snapshot, quality, synthetic, channel, edited } = source;
   const { totals, scope, comparison } = snapshot;
@@ -236,6 +244,7 @@ export function buildReport(source: ReportSource) {
 }
 
 export type GrowthReport = ReturnType<typeof buildReport>;
+/** 对插入 HTML 报告的文本进行实体转义。 */
 const html = (value: Cell) =>
   String(display(value)).replace(
     /[&<>"']/g,
@@ -244,11 +253,13 @@ const html = (value: Cell) =>
         character
       ]!,
   );
+/** 转义 Markdown 表格单元格中的控制符号。 */
 const markdown = (value: Cell) =>
   html(value)
     .replace(/[\\`*_{}\[\]()#+!|~]/g, "\\$&")
     .replace(/\r?\n/g, "  \n");
 
+/** 将统一报告模型导出为 Markdown。 */
 export function reportMarkdown(report: GrowthReport): string {
   return (
     [
@@ -256,6 +267,7 @@ export function reportMarkdown(report: GrowthReport): string {
       report.subtitle,
       ...report.sections.map((section) => {
         const { table, paragraphs = [] } = section;
+        /** 生成一行 Markdown 表格。 */
         const row = (cells: Cell[]) =>
           `| ${cells.map((cell) => markdown(cell).replace(/\s*\n/g, " ")).join(" | ")} |`;
         return [
@@ -276,7 +288,9 @@ export function reportMarkdown(report: GrowthReport): string {
   );
 }
 
+/** 将统一报告模型导出为可浏览和打印的 HTML。 */
 export function reportHtml(report: GrowthReport): string {
+  /** 生成一组经过转义的 HTML 表格单元格。 */
   const cells = (row: Cell[], tag: "th" | "td") =>
     row.map((cell) => `<${tag}>${html(cell)}</${tag}>`).join("");
   const sections = report.sections
@@ -292,7 +306,9 @@ export function reportHtml(report: GrowthReport): string {
   return `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${html(report.title)}</title><style>body{font:16px/1.65 system-ui,sans-serif;color:#19372b;margin:24px auto;padding:0 16px;max-width:880px}section{margin:24px 0}h2{border-bottom:1px solid #dbe3d8;font-size:1.15rem}p{white-space:pre-line;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%;table-layout:fixed}th,td{padding:6px;border-bottom:1px solid #dbe3d8;text-align:left;overflow-wrap:anywhere}@media print{body{margin:0;color:#111}h2{break-after:avoid}tr{break-inside:avoid}}</style><main><h1>${html(report.title)}</h1><p>${html(report.subtitle)}</p>${sections}</main></html>`;
 }
 
+/** 将报告表格展平为 CSV，保留各段标题和表头。 */
 export function reportCsv(report: GrowthReport): string {
+  /** 转义 CSV 单元格，并保护可能被表格应用解析为公式的文本。 */
   const cell = (value: Cell, index: number) => {
     const raw = String(value ?? "");
     // First two columns can contain spreadsheet formulas from imported data.

@@ -40,6 +40,7 @@ export interface ParseXLSXOptions {
  * const rows = await readXlsxFile(file);
  * const data = convertXLSXRows(rows);
  * ```
+ * 把 Excel 原始单元格整理成与 CSV 相同的表头和行结构。
  */
 export function convertXLSXRows(
   rawRows: (string | number | boolean | Date | null)[][],
@@ -116,6 +117,7 @@ export function convertXLSXRows(
  *   console.log(data.headers, data.rowCount);
  * };
  * ```
+ * 按指定工作表读取浏览器文件并转换数据。
  */
 export async function parseXLSX(
   file: File,
@@ -127,12 +129,13 @@ export async function parseXLSX(
   return convertXLSXRows(rawRows, options);
 }
 
-/** List workbook sheets without selecting one. Browser and worker compatible. */
+/** 读取工作簿的工作表名称，供导入前选择。 List workbook sheets without selecting one. Browser and worker compatible. */
 export async function listXLSXSheets(file: File): Promise<string[]> {
   const { readSheetNames } = await loadReader();
   return readSheetNames(file);
 }
 
+/** 在浏览器窗口或 Worker 中加载可用的 Excel 读取入口。 */
 async function loadReader() {
   return typeof DOMParser === "undefined"
     ? import("read-excel-file/web-worker")

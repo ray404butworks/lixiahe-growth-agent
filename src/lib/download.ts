@@ -1,4 +1,4 @@
-/** Save a blob as a file. The URL is revoked later, once the browser has read it. */
+/** 以临时对象地址触发下载，并延迟释放地址以兼容不同浏览器。 Save a blob as a file. The URL is revoked later, once the browser has read it. */
 export function downloadBlob(blob: Blob, fileName: string): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -19,6 +19,7 @@ const PLAIN_NUMBER =
  * Quote a CSV field. Text starting with = + - @ (or a tab/CR) is prefixed with
  * an apostrophe so spreadsheets do not run it as a formula; numbers such as
  * "-5" are left as they are.
+ * 按 CSV 规则转义引号、分隔符和换行。
  */
 export function escapeCSVField(value: string): string {
   const safe =
@@ -28,7 +29,7 @@ export function escapeCSVField(value: string): string {
   return `"${safe.replace(/"/g, '""')}"`;
 }
 
-/** CSV text for a header row and data rows, safe to open in a spreadsheet. */
+/** 把表头和数据行拼成可下载的 CSV 文本。 CSV text for a header row and data rows, safe to open in a spreadsheet. */
 export function toCSV(headers: string[], rows: string[][]): string {
   return [headers, ...rows]
     .map((row) => row.map((v) => escapeCSVField(String(v ?? ""))).join(","))

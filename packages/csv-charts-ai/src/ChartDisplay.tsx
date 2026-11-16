@@ -27,6 +27,7 @@ export interface ChartDisplayProps {
   unstyled?: boolean;
 }
 
+/** 为没有自定义卡片容器的调用方提供默认图表外框。 */
 function DefaultCard({
   children,
   className = "",
@@ -38,6 +39,7 @@ function DefaultCard({
   return <div className={className}>{children}</div>;
 }
 
+/** 根据数据和图表配置创建图表列表，并下传组件扩展项。 */
 export function ChartDisplay({
   data,
   charts,

@@ -44,6 +44,7 @@ export interface ParseCSVOptions {
  * For very complex CSV files (multi-line quoted fields with nested newlines,
  * exotic encodings), consider using PapaParse and passing the result as
  * TabularData directly to the AI functions.
+ * 读取 CSV、去除空行并按选项建立唯一表头。
  */
 export function parseCSV(
   csv: string,
@@ -98,6 +99,7 @@ export function parseCSV(
 
 // ============ Delimiter Detection ============
 
+/** 比较候选分隔符产生的列分布，跳过引号内部内容。 */
 export function detectCSVDelimiter(csv: string): string {
   const firstLines: string[] = [];
   let quoted = false;
@@ -156,6 +158,7 @@ export function detectCSVDelimiter(csv: string): string {
   return best;
 }
 
+/** 判断引号是否位于字段开始处。 */
 function isFieldStart(text: string, i: number): boolean {
   if (i === 0) return true;
   const prev = text[i - 1]!;
@@ -171,6 +174,7 @@ const DELIMITER_CANDIDATES: Record<string, true> = {
 
 // ============ Row Parsing (RFC 4180) ============
 
+/** 逐字符解析 CSV，处理引号转义、分隔符和跨行字段。 */
 function parseRows(
   csv: string,
   delimiter: string,

@@ -4,6 +4,7 @@ import { existsSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 registerHooks({
+  /** 为接口校验脚本的本地导入补全 TypeScript 扩展名。 */
   resolve(specifier, context, next) {
     if (specifier.startsWith(".") && context.parentURL) {
       const candidate = new URL(`${specifier}.ts`, context.parentURL);
@@ -43,6 +44,7 @@ try {
   }
   assert(health, "local API did not become ready");
   assert.equal(health.reason, "key_missing");
+  /** 向本机 API 发送 JSON，供启动后的基本接口验证使用。 */
   const post = (path, body, headers = {}) =>
     fetch(`${base}${path}`, {
       method: "POST",
@@ -64,7 +66,8 @@ try {
   assert(content.text.product_copy.includes("【待核对产地】"));
   const homepage = await fetch(base);
   assert.equal(homepage.status, 200);
-  assert((await homepage.text()).includes("阶段 01—04"));
+  assert((await homepage.text()).includes("导入销售数据"));
+  assert.equal((await fetch(`${base}/api/knowledge`)).status, 404);
   assert.equal((await fetch(`${base}/.env.local`)).status, 404);
   assert.equal(
     (
@@ -86,6 +89,7 @@ try {
     video_segments: content.text.video_segments.length,
     action_days: content.plan.length,
     static_html: "passed",
+    retired_knowledge_route: "404",
     env_file_not_public: "passed",
     cross_origin_rejected: "passed",
     scope: "real Node HTTP service + static page bytes; not browser E2E",

@@ -16,7 +16,6 @@ Next开发模式将 `/api/*` 转发到本机8080；生产交付直接运行打�
 | 接口 | 输入/输出 |
 |---|---|
 | GET /api/health | 模式、是否具备完整配置、版本；没有密钥或完整环境变量 |
-| GET /api/knowledge | 六张来源知识卡片 |
 | POST /api/diagnose | 标准化rows、filters、synthetic、allow_model；返回3—5条建议、证据、缺失项、快照ID、模式和降级原因 |
 | POST /api/content | 同上，加facts和recommendation_id；返回三段短视频脚本、商品文案、社交文案、七日行动清单 |
 

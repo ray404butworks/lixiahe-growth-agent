@@ -13,7 +13,7 @@ export interface DataQualityResult {
   columns: { name: string; missing: number; invalid: number }[];
 }
 
-/** Local, deterministic diagnostics. Input is never modified. */
+/** 汇总字段类型、缺失、重复及混合值等质量信息。 Local, deterministic diagnostics. Input is never modified. */
 export function analyzeDataQuality(data: TabularData): DataQualityResult {
   const columns = data.columns.map((c) => ({
     name: c.name,

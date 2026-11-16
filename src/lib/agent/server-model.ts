@@ -7,10 +7,12 @@ export type ModelConfig = {
   timeoutMs: number;
 };
 export class ModelError extends Error {
+  /** 记录模型调用失败原因，供上层选择回退路径。 */
   constructor(public reason: FallbackReason) {
     super(reason);
   }
 }
+/** 从环境变量读取模型开关、服务地址、名称和凭据。 */
 export function modelConfig(
   env: Record<string, string | undefined> = process.env,
 ): ModelConfig {
@@ -25,6 +27,7 @@ export function modelConfig(
     ),
   };
 }
+/** 检查模型配置完整性，返回触发离线模式的原因。 */
 export function unavailableReason(config: ModelConfig): FallbackReason | null {
   if (!config.apiKey) return "key_missing";
   if (!config.enabled) return "model_disabled";
@@ -45,6 +48,7 @@ export function unavailableReason(config: ModelConfig): FallbackReason | null {
   }
   return null;
 }
+/** 向配置好的模型发送结构化请求，并校验响应大小和格式。 */
 export async function callModel(
   config: ModelConfig,
   system: string,

@@ -2,6 +2,7 @@
 
 type Action = { label: string; onClick: () => void };
 
+/** 显示当前缺口和恢复操作，并支持附加一个次要入口。 */
 export function WorkspaceEmptyState({
   title,
   primary,

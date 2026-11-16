@@ -1,3 +1,4 @@
+/** 展示数据处理和模型授权方式，并提供返回入口。 */
 export default function LegalPage() {
   return (
     <main

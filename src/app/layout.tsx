@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   },
   robots: { index: false, follow: false },
 };
+/** 设置中文页面语言，并为所有工作台页面提供统一的文档结构。 */
 export default function RootLayout({
   children,
 }: {

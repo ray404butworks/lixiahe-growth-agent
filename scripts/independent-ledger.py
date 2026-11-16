@@ -5,6 +5,7 @@ from decimal import Decimal, getcontext
 getcontext().prec=100
 root=Path(__file__).resolve().parents[1]
 def ledger(rows):
+    """独立汇总样例交易，供经营指标回归测试对账。"""
     rows=[r for r in rows if r['订单状态']!='cancelled']
     gross=sum((Decimal(r['销售数量'])*Decimal(r['销售单价']) for r in rows),Decimal(0))
     refunds=sum((Decimal(r['该行退款金额']) for r in rows),Decimal(0))
@@ -15,6 +16,7 @@ for scenario in ['normal','low-contribution','high-refund']:
     with (root/'data/demo'/f'{scenario}.csv').open(encoding='utf-8-sig') as f: rows=list(csv.DictReader(f))
     result[scenario]={'totals':ledger(rows),'channels':{key:ledger([r for r in rows if r['销售渠道']==key]) for key in sorted({r['销售渠道'] for r in rows})}}
 def canonical(value):
+    """递归规范化金额文本，保持基准账本的数值表示一致。"""
     if isinstance(value, dict): return {key:canonical(item) for key,item in value.items()}
     if isinstance(value, str): return format(Decimal(value).normalize(),'f')
     return value

@@ -17,6 +17,7 @@ const labels: Partial<Record<keyof Totals, string>> = {
   line_count: "有效商品行数",
   order_count: "有效订单数",
 };
+/** 将快照中的整体、渠道和商品指标登记为诊断可引用的证据。 */
 export function evidenceRegistry(
   snapshot: MetricSnapshot,
 ): Record<string, Evidence> {
@@ -24,6 +25,7 @@ export function evidenceRegistry(
     string,
     Evidence
   >;
+  /** 只有指标存在有效值时才登记证据条目。 */
   const add = (prefix: string, totals: Totals, name = "全部") => {
     for (const [field, title] of Object.entries(labels)) {
       const value = totals[field as keyof Totals];
@@ -55,6 +57,7 @@ export function evidenceRegistry(
     add(`sku.${encodeURIComponent(group.key)}`, group, group.name);
   return registry;
 }
+/** 为经营快照生成稳定标识，以核对诊断和草稿的来源。 */
 export function snapshotId(snapshot: MetricSnapshot): string {
   // Deterministic change detector, not a security signature or proof of authenticity.
   const value = JSON.stringify(snapshot);

@@ -2,6 +2,7 @@ import { registerHooks } from "node:module";
 import { existsSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 registerHooks({
+  /** 为基准脚本的本地导入补全 TypeScript 扩展名。 */
   resolve(specifier, context, next) {
     if (specifier.startsWith(".") && context.parentURL) {
       const candidate = new URL(`${specifier}.ts`, context.parentURL);

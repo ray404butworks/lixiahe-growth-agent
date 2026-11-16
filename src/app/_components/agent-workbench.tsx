@@ -45,6 +45,7 @@ const reasons: Record<FallbackReason, string> = {
   offline: "当前未连接本地API服务，使用浏览器离线规则。",
   not_authorized: "本次未允许外部模型处理，当前使用离线规则。",
 };
+/** 为新商品建立待填写的事实表，并带入商品标识和名称。 */
 const emptyFacts = (): ProductFacts => ({
   sku: "",
   name: "",
@@ -60,6 +61,7 @@ const factNames = {
   selling_point: "商品特点",
   shipping: "配送说明",
 };
+/** 把可编辑的营销草稿拼成可直接复制的纯文本。 */
 export function marketingPlainText(draft: MarketingDraft): string {
   return [
     draft.label,
@@ -83,6 +85,7 @@ export function marketingPlainText(draft: MarketingDraft): string {
     ).map((card) => `${card.knowledge_id} ${card.title}｜${card.source_url}`),
   ].join("\n\n");
 }
+/** 维护诊断、商品事实及草稿状态，向报告页提供当前结果。 */
 export function AgentWorkbench({
   view,
   input,
@@ -129,6 +132,7 @@ export function AgentWorkbench({
         setModelReady(value.model_configured === true),
       )
       .catch(() => setModelReady(false));
+    /** 卸载时取消未完成的请求，避免过期响应写入工作台。 */
     return () => {
       abort.abort();
       controller.current?.abort();
@@ -136,6 +140,7 @@ export function AgentWorkbench({
   }, []);
   const eligible = !!input && !!snapshot?.totals.line_count;
   const violations = useMemo(() => factViolations(facts), [facts]);
+  /** 从所选商品预填名称和待确认规格，并清除上一商品的草稿。 */
   function chooseProduct(sku: string) {
     const product = snapshot?.skus.find((item) => item.key === sku);
     const name = product?.name.replace(/（.*?）/g, "").trim() ?? "";
@@ -151,6 +156,7 @@ export function AgentWorkbench({
     setEdited(false);
     setStatus("");
   }
+  /** 清除当前草稿及其编辑状态，并取消正在生成的请求。 */
   function invalidateDraft() {
     serial.current++;
     controller.current?.abort();
@@ -160,14 +166,17 @@ export function AgentWorkbench({
     setStatus("");
     setEdited(false);
   }
+  /** 保存当前事实表并使基于旧事实生成的草稿失效。 */
   function updateFacts(next: ProductFacts) {
     setFacts(next);
     invalidateDraft();
   }
+  /** 切换营销依据，并清除关联到上一条建议的草稿。 */
   function chooseRecommendation(id: string) {
     setSelected(id);
     invalidateDraft();
   }
+  /** 用当前经营范围请求诊断，处理取消和数据变化导致的过期结果。 */
   async function runDiagnosis() {
     if (!input || !eligible) return;
     const token = ++serial.current;
@@ -193,6 +202,7 @@ export function AgentWorkbench({
       if (token === serial.current) setBusy(false);
     }
   }
+  /** 校验商品事实后提交营销请求，并记录新草稿对应的快照。 */
   async function generate() {
     if (!input || !diagnosis || !selected || !facts.sku || violations.length)
       return;
@@ -226,6 +236,7 @@ export function AgentWorkbench({
       if (token === serial.current) setBusy(false);
     }
   }
+  /** 修改一个文本字段，并记录报告需要展示的编辑状态。 */
   function editText(
     key: "video_title" | "product_copy" | "social_copy",
     value: string,
@@ -236,6 +247,7 @@ export function AgentWorkbench({
       setStatus("");
     }
   }
+  /** 按位置更新一段短视频脚本。 */
   function editSegment(
     index: number,
     key: "visual" | "narration",
@@ -249,6 +261,7 @@ export function AgentWorkbench({
     setEdited(true);
     setStatus("");
   }
+  /** 复制当前编辑版本，并反馈复制结果。 */
   async function copy() {
     if (!draft) return;
     try {
@@ -269,7 +282,10 @@ export function AgentWorkbench({
   ) : (
     <WorkspaceEmptyState
       title="还没有销售数据"
-      primary={{ label: "导入销售数据", onClick: () => onNavigate("import") }}
+      primary={{
+        label: "导入销售数据",
+        /** 从空状态返回销售数据导入。 */ onClick: () => onNavigate("import"),
+      }}
       secondary={{ label: "使用演示样例", onClick: onUseSample }}
     />
   );
@@ -332,6 +348,7 @@ export function AgentWorkbench({
         title="先完成经营诊断"
         primary={{
           label: "进入经营诊断",
+          /** 打开经营诊断，为营销草稿选择建议。 */
           onClick: () => onNavigate("diagnose"),
         }}
       />
@@ -770,6 +787,7 @@ export function AgentWorkbench({
     </div>
   );
 }
+/** 展示一张本土知识卡，包含来源、核验日期和适用场景。 */
 function KnowledgeCardView({ card }: { card: KnowledgeCard }) {
   return (
     <article className="panel knowledge-card">

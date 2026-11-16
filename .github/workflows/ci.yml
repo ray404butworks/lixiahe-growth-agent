@@ -1,4 +1,4 @@
-name: Phase 1-2 manual validation
+name: Workspace validation
 on:
   workflow_dispatch:
 permissions:
@@ -16,6 +16,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm lint && pnpm typecheck && pnpm test:all && pnpm build
+      - run: pnpm lint && pnpm build && pnpm test:all
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e:growth

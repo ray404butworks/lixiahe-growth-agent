@@ -3,6 +3,7 @@ const NUMERIC_PATTERN = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
 /** Parse complete finite numbers, including grouped thousands and decimal commas.
  * A comma followed by exactly three digits is a thousands separator; ambiguous
  * locales should be normalized by the caller. Blank and invalid values are missing.
+ * 解析常见数字格式，并将不可用值返回为空。
  */
 export function parseNumericValue(value: string): number | null {
   let text = value.trim();
@@ -24,6 +25,7 @@ export function parseNumericValue(value: string): number | null {
 /**
  * Round to 6 significant digits without losing integer digits, so tiny ratios
  * keep their precision and large totals stay exact.
+ * 按有效数字取整，降低浮点尾数对展示的影响。
  */
 export function roundSignificant(value: number, digits = 6): number {
   if (!Number.isFinite(value) || Number.isInteger(value) || value === 0)
@@ -44,6 +46,7 @@ const LOCAL_DATE = /^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})$/;
  * ISO dates and datetimes, or local dates. Datetimes without an offset are read
  * as UTC, like plain dates. Local dates follow `order`; without it they are
  * day/month/year unless only month/day/year is valid.
+ * 根据推断的顺序解析日期，拒绝日历中不存在的值。
  */
 export function parseDateValue(
   value: string,
@@ -86,6 +89,7 @@ export function parseDateValue(
   return Number.isFinite(date) ? date : null;
 }
 
+/** 检查年月日组合是否是实际可用的日期。 */
 function isValidDay(year: number, month: number, day: number): boolean {
   return (
     month >= 1 &&
@@ -98,6 +102,7 @@ function isValidDay(year: number, month: number, day: number): boolean {
 /**
  * Choose one day/month order for a whole column of local dates, so 03/04/2024
  * is read the same way as 25/04/2024 or 04/25/2024 next to it.
+ * 从可判断的样例推断日和月的排列顺序。
  */
 export function detectDateOrder(values: Iterable<string>): DateOrder {
   let dmy = 0,
@@ -113,6 +118,7 @@ export function detectDateOrder(values: Iterable<string>): DateOrder {
   return mdy > dmy ? "mdy" : "dmy";
 }
 
+/** 判断单元格值能否表示受支持的日期。 */
 export function isDateValue(value: string, order?: DateOrder): boolean {
   return parseDateValue(value, order) !== null;
 }
@@ -131,14 +137,14 @@ export const BOOLEAN_VALUES = new Set([
 /** Most values inspected when inferring a column type. */
 export const TYPE_SAMPLE_SIZE = 1000;
 
-/** Pick up to `max` items spread evenly over the whole array. */
+/** 在保持原顺序的前提下均匀取样。 Pick up to `max` items spread evenly over the whole array. */
 export function sampleEvenly<T>(items: readonly T[], max: number): T[] {
   if (items.length <= max) return [...items];
   const step = items.length / max;
   return Array.from({ length: max }, (_, i) => items[Math.floor(i * step)]!);
 }
 
-/** Infer a column's type from a sample spread over the whole file. */
+/** 根据样例分布判断列属于数字、日期或文本。 Infer a column's type from a sample spread over the whole file. */
 export function inferValuesType(
   values: string[],
 ): "string" | "number" | "date" | "boolean" {
@@ -160,7 +166,7 @@ export function inferValuesType(
   return "string";
 }
 
-/** Infer the type of column `index` without copying every row. */
+/** 对列值取样后推断类型，限制大表扫描开销。 Infer the type of column `index` without copying every row. */
 export function inferColumnValuesType(
   rows: readonly string[][],
   index: number,
@@ -170,6 +176,7 @@ export function inferColumnValuesType(
   );
 }
 
+/** 处理空表头和重复名称，确保字段名可明确引用。 */
 export function uniqueHeaders(headers: string[]): string[] {
   const reserved = new Set(headers.map((h) => h.trim().toLowerCase()));
   const seen = new Set<string>();

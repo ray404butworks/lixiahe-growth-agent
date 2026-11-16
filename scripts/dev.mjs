@@ -22,15 +22,18 @@ const child = spawn(
   [require.resolve("next/dist/bin/next"), "dev", ...args],
   { stdio: "inherit" },
 );
+// 退出开发命令时向页面服务和本地 API 转发信号。
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => {
     child.kill(signal);
     api.kill(signal);
   });
+// 页面服务退出后关闭本地 API，并传出其退出码。
 child.on("exit", (code) => {
   api.kill("SIGTERM");
   process.exit(code ?? 1);
 });
+// API 启动失败时终止页面服务，避免留下只能部分工作的开发环境。
 api.on("exit", (code) => {
   if (code) {
     child.kill("SIGTERM");
