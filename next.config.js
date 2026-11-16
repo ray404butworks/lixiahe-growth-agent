@@ -3,15 +3,9 @@
  * for Docker builds.
  */
 import "./src/env.js";
-import { readFileSync } from "fs";
-
-const pkg = JSON.parse(readFileSync("./package.json", "utf-8"));
 
 /** @type {import("next").NextConfig} */
 const config = {
-  env: {
-    NEXT_PUBLIC_APP_VERSION: pkg.version,
-  },
   // Output mode: "export" for GitHub Pages, "standalone" for Docker self-hosting
   // Set NEXT_OUTPUT_MODE=standalone for Docker builds
   output: process.env.NODE_ENV === "development" ? undefined : "export",

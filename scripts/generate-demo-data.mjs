@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 // Node 24 strips TS natively. Resolve the project's extensionless TS imports.
 registerHooks({
+  /** 为样例生成脚本的本地导入补全 TypeScript 扩展名。 */
   resolve(specifier, context, next) {
     if (specifier.startsWith(".") && context.parentURL) {
       const candidate = new URL(`${specifier}.ts`, context.parentURL);

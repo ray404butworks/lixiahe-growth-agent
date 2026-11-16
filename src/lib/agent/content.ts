@@ -13,6 +13,7 @@ export const AI_DRAFT_LABEL =
   "AI辅助生成草稿 · 发布前请核对商品事实、来源与平台规则";
 const restricted =
   /国家认证|有机|绿色食品|非转基因|官方推荐|获奖|金奖|organic|certified|cures|地理标志|兴化大闸蟹|兴化大米|最佳|最好|第一|唯一|顶级|零添加|百分之百|100[%％]|治疗|治愈|降血糖|降三高|抗癌|保健功效|忽略.{0,8}(指令|规则)|泄露|密钥|api\s*key|<\/?script|system\s*:/i;
+/** 列出商品事实表中缺失、矛盾或需确认的项目。 */
 export function factViolations(facts: ProductFacts): string[] {
   const fields = {
     name: facts.name,
@@ -36,6 +37,7 @@ export type MarketingDraft = {
   knowledge_ids: string[];
   plan: { day: number; action: string; evidence_metric_keys: string[] }[];
 };
+/** 把核对过的商品事实整理为模板可用的值。 */
 export function factValues(facts: ProductFacts) {
   return {
     name: facts.name_confirmed ? facts.name : "【待核对商品名称】",
@@ -57,11 +59,13 @@ export function factValues(facts: ProductFacts) {
         : "【待核对配送说明】",
   };
 }
+/** 用核对结果填充各段营销模板，并为未知值保留待核对标记。 */
 export function renderMarketing(
   template: MarketingText,
   facts: ProductFacts,
 ): MarketingText {
   const values = factValues(facts);
+  /** 将单段营销文案中的事实占位符替换为对应值。 */
   const render = (text: string) =>
     text.replace(
       /\{\{(name|specification|origin|selling_point|shipping)\}\}/g,
@@ -100,6 +104,7 @@ export const RULE_MARKETING_TEMPLATE: MarketingText = {
   social_copy:
     "这次想把{{name}}介绍清楚：{{specification}}，{{selling_point}}。来源信息为{{origin}}；配送请看{{shipping}}。有疑问先聊聊，确认适合再下单。",
 };
+/** 验证诊断建议、经营范围和商品事实是否匹配，构建营销上下文。 */
 export function prepareMarketing(
   input: ContentRequest,
   diagnosis: Diagnosis,
@@ -161,6 +166,7 @@ export function prepareMarketing(
     })),
   };
 }
+/** 按离线规则生成短视频、商品介绍、社交文案和七日计划。 */
 export function offlineMarketing(input: ContentRequest): MarketingDraft {
   const parsed = contentRequestSchema.parse(input);
   return prepareMarketing(parsed, offlineDiagnosis(parsed));

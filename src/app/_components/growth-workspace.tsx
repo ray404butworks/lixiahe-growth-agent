@@ -58,7 +58,13 @@ import {
   decodeText,
   type CSVData,
 } from "~/lib/csv-parser";
-import { parseXLSX } from "~/lib/xlsx-parser";
+import {
+  isSupportedFile,
+  isXLSXFile,
+  parseXLSX,
+  SPREADSHEET_ACCEPT,
+} from "~/lib/xlsx-parser";
+import { listXLSXSheets } from "csv-charts-ai/tabular";
 import "~/styles/growth.css";
 import "~/styles/agent.css";
 import "~/styles/workspace.css";
@@ -92,6 +98,7 @@ const workspaceNavigation = [
   { view: "knowledge", icon: BookOpen },
 ] as const;
 
+/** 渲染共用导航，并标明当前工作台入口。 */
 function WorkspaceNavigation({
   current,
   onNavigate,
@@ -117,6 +124,7 @@ function WorkspaceNavigation({
   );
 }
 
+/** 显示共用垛田标志和工作台名称。 */
 function WorkspaceBrand() {
   return (
     <a href="/" className="brand">
@@ -139,8 +147,10 @@ type Dataset = {
   fileName: string;
   synthetic: boolean;
 };
+/** 查找字段的中文显示名，未知字段沿用原键名。 */
 const label = (key: string) =>
   FIELDS.find((field) => field.key === key)?.label ?? key;
+/** 构造并触发销售模板文件下载。 */
 function download(
   text: string,
   filename: string,
@@ -153,16 +163,19 @@ function download(
   anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+/** 压缩图表轴上的大数显示，便于比较量级。 */
 function shortNumber(value: number) {
   return Math.abs(value) >= 10000
     ? `${(value / 10000).toFixed(1)}万`
     : String(Math.round(value));
 }
 
+/** 判断滚动区下方是否仍有未显示的导航入口。 */
 function hasMoreMenuEntries(menu: HTMLElement) {
   return menu.scrollHeight - menu.clientHeight - menu.scrollTop > 1;
 }
 
+/** 组织文件导入、指标筛选和各页切换，统一持有会话内的经营数据。 */
 export function GrowthWorkspace({
   initialView = "import",
 }: {
@@ -208,6 +221,7 @@ export function GrowthWorkspace({
     });
     observer.observe(menu);
     if (menu.firstElementChild) observer.observe(menu.firstElementChild);
+    /** 菜单关闭或组件卸载时停止监听尺寸变化。 */
     return () => observer.disconnect();
   }, [view, workspaceMenuOpen]);
   const normalized = useMemo(() => {
@@ -258,6 +272,7 @@ export function GrowthWorkspace({
         : null,
     [dataset, start, end, channel],
   );
+  /** 载入所选演示账本并进入字段核对。 */
   function loadSample(scenario: Scenario) {
     request.current++;
     setBusy(false);
@@ -281,6 +296,7 @@ export function GrowthWorkspace({
     navigateWorkspace("import");
     setNotice("");
   }
+  /** 解析销售文件，并将格式、体积和解析错误反馈到导入页。 */
   async function parseFile(
     next: File,
     nextEncoding = encoding,
@@ -297,7 +313,7 @@ export function GrowthWorkspace({
     setSynthetic(false);
     setView("import");
     try {
-      if (!/\.(csv|xlsx)$/i.test(next.name))
+      if (!isSupportedFile(next.name))
         throw new Error("仅支持CSV和Excel（.xlsx），请先转换其他格式。");
       if (next.size > MAX_BYTES)
         throw new Error("文件超过5MB，请拆分后再导入。");
@@ -306,10 +322,9 @@ export function GrowthWorkspace({
       let names: string[] = [];
       let parsedWarnings: string[] = [];
       const bytes = await next.arrayBuffer();
-      if (/\.xlsx$/i.test(next.name)) {
+      if (isXLSXFile(next.name)) {
         validateWorkbookArchive(bytes);
-        const { readSheetNames } = await import("read-excel-file/browser");
-        names = await readSheetNames(next);
+        names = await listXLSXSheets(next);
         data = await parseXLSX(next, {
           sheet: nextSheet || names[0],
           hasHeader: true,
@@ -353,6 +368,7 @@ export function GrowthWorkspace({
       if (token === request.current) setBusy(false);
     }
   }
+  /** 确认映射和数据质量检查，登记账本并进入看板。 */
   function confirmImport() {
     if (
       !normalized?.result?.rows.length ||
@@ -366,16 +382,19 @@ export function GrowthWorkspace({
     navigateWorkspace("dashboard");
     setNotice("");
   }
+  /** 在保留会话数据的情况下切换工作台页面。 */
   function navigateWorkspace(next: View) {
     setWorkspaceMenuOpen(false);
     setDashboardFiltersOpen(false);
     setView(next);
     if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
   }
+  /** 返回看板并展开筛选，方便调整当前统计范围。 */
   function adjustDashboardFilters() {
     navigateWorkspace("dashboard");
     setDashboardFiltersOpen(true);
   }
+  /** 取消当前解析并清除会话中的文件与账本，返回导入步骤。 */
   function clear() {
     request.current++;
     setRaw(null);
@@ -402,6 +421,7 @@ export function GrowthWorkspace({
     page,
     Math.max(0, Math.ceil(preview.length / 10) - 1),
   );
+  /** 按扣退款销售额对分组排序，缺少退款数据时使用成交额。 */
   const ranked = (groups: Group[]) =>
     [...groups].sort((a, b) => {
       const aValue = totalUnits(a.net_sales ?? a.gross_sales);
@@ -657,7 +677,7 @@ export function GrowthWorkspace({
                           ref={fileInput}
                           aria-label="选择销售数据文件"
                           type="file"
-                          accept=".csv,.xlsx"
+                          accept={SPREADSHEET_ACCEPT}
                           disabled={busy}
                           onChange={(event) => {
                             const selected = event.target.files?.[0];
@@ -984,10 +1004,12 @@ export function GrowthWorkspace({
               title="还没有销售数据"
               primary={{
                 label: "导入销售数据",
+                /** 从看板空状态打开导入。 */
                 onClick: () => navigateWorkspace("import"),
               }}
               secondary={{
                 label: "使用演示样例",
+                /** 用正常经营样例填充待核对账本。 */
                 onClick: () => loadSample("normal"),
               }}
             />
@@ -1378,6 +1400,7 @@ export function GrowthWorkspace({
     </div>
   );
 }
+/** 显示核心指标、状态和需要时可展开的计算口径。 */
 function MetricCard({
   title,
   value,
@@ -1415,6 +1438,7 @@ function MetricCard({
     </section>
   );
 }
+/** 用同一组经营指标比较渠道或商品。 */
 function GroupTable({ title, groups }: { title: string; groups: Group[] }) {
   return (
     <section className="panel">
@@ -1461,6 +1485,7 @@ function GroupTable({ title, groups }: { title: string; groups: Group[] }) {
     </section>
   );
 }
+/** 汇总数据校验结果，并展开被拒行等核对细节。 */
 function QualityPanel({ quality }: { quality: QualityReport }) {
   return (
     <div className="quality-panel">

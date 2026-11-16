@@ -21,11 +21,13 @@ export const SCENARIOS: {
     description: "观察退款如何改变商品表现",
   },
 ];
+/** 用固定种子生成可复现的样例，按经营场景调整退款或成本。 */
 export function generateDemo(
   scenario: Scenario = "normal",
   seed = 20261104,
 ): OrderRow[] {
   let state = seed >>> 0;
+  /** 推进样例随机序列，使同一场景可重复生成。 */
   const random = () => {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
     return state / 4294967296;
@@ -60,6 +62,7 @@ export function generateDemo(
       !cancelled &&
       random() <
         (scenario === "high-refund" && product.sku === "CRAB-BOX" ? 0.3 : 0.04);
+    /** 把金额从整数分转换为销售表使用的两位小数字符串。 */
     const cents = (value: number) =>
       `${Math.floor(value / 100)}.${String(value % 100).padStart(2, "0")}`;
     return {
@@ -83,12 +86,14 @@ export function generateDemo(
     };
   });
 }
+/** 转义样例数据中的 CSV 特殊字符。 */
 function safeCell(value: string): string {
   // Prevent spreadsheet formula execution in CSV downloads.
   const safe =
     /^[=+@\t\r]/.test(value) || /^-\D/.test(value) ? `'${value}` : value;
   return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
+/** 按字段契约的固定列顺序导出样例账本。 */
 export function rowsToCSV(
   rows: readonly OrderRow[],
   chineseHeaders = false,

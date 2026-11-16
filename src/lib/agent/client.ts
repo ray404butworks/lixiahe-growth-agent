@@ -2,6 +2,7 @@ import { offlineDiagnosis, type Diagnosis } from "./rules";
 import { offlineMarketing, type MarketingDraft } from "./content";
 import type { ContentRequest, DiagnosisRequest } from "./schema";
 export class AgentRequestError extends Error {}
+/** 向本地服务发出可取消的 JSON 请求，并将错误转换成界面可读的消息。 */
 async function requestJSON<T>(
   path: string,
   payload: unknown,
@@ -27,6 +28,7 @@ async function requestJSON<T>(
     throw new Error("接口结果不完整");
   return result;
 }
+/** 请求经营诊断，按需回退到浏览器内的规则诊断。 */
 export async function requestDiagnosis(
   input: DiagnosisRequest,
   signal?: AbortSignal,
@@ -39,6 +41,7 @@ export async function requestDiagnosis(
     return { ...result, meta: { ...result.meta, fallback_reason: "offline" } };
   }
 }
+/** 请求营销草稿，按需回退到浏览器内的规则草稿。 */
 export async function requestMarketing(
   input: ContentRequest,
   signal?: AbortSignal,

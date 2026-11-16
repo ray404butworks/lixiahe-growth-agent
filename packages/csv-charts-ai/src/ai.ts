@@ -108,6 +108,7 @@ export class AIRequestError extends Error {
   readonly statusCode?: number;
   readonly isRetryable?: boolean;
 
+  /** 保留模型错误类型、状态码和可重试信息。 */
   constructor(
     message: string,
     options: { cause: unknown; statusCode?: number; isRetryable?: boolean },
@@ -119,7 +120,7 @@ export class AIRequestError extends Error {
   }
 }
 
-/** True for cancellations (AbortController, AbortSignal.timeout). */
+/** 识别主动取消或超时引起的请求中止。 True for cancellations (AbortController, AbortSignal.timeout). */
 export function isAbortError(error: unknown): boolean {
   return (
     typeof error === "object" &&
@@ -132,6 +133,7 @@ export function isAbortError(error: unknown): boolean {
 /**
  * Find the HTTP status and retry hint of a provider error, looking through
  * `cause` and the AI SDK's RetryError (`lastError`).
+ * 沿错误链提取 HTTP 状态与重试提示。
  */
 export function getErrorDetails(error: unknown): {
   statusCode?: number;
@@ -153,7 +155,7 @@ export function getErrorDetails(error: unknown): {
   return {};
 }
 
-/** Rethrow cancellations untouched; wrap everything else in an {@link AIRequestError}. */
+/** 保留取消语义，并把其他服务异常统一包装成模型错误。 Rethrow cancellations untouched; wrap everything else in an {@link AIRequestError}. */
 export function toAIError(error: unknown): Error {
   if (isAbortError(error)) return error as Error;
   if (error instanceof AIRequestError) return error;
@@ -174,6 +176,7 @@ const MODEL_MESSAGE = "Model not available. Please select a different model.";
 /**
  * Extracts a user-friendly error message from AI provider errors.
  * Exported so consumers can use it in their own error handling.
+ * 把常见模型和网络错误转换为适合界面显示的消息。
  */
 export function getAIErrorMessage(error: unknown): string {
   // Handle Zod validation errors
@@ -237,7 +240,7 @@ export function getAIErrorMessage(error: unknown): string {
 /** Longest cell value sent to the model; longer values are cut. */
 export const MAX_PROMPT_CELL_LENGTH = 200;
 
-/** Cut a cell value so one huge cell cannot blow up a prompt. */
+/** 限制写入模型提示词的单元格长度。 Cut a cell value so one huge cell cannot blow up a prompt. */
 export function clipCell(value: string, max = MAX_PROMPT_CELL_LENGTH): string {
   return value.length > max ? `${value.slice(0, max)}…` : value;
 }
@@ -245,6 +248,7 @@ export function clipCell(value: string, max = MAX_PROMPT_CELL_LENGTH): string {
 /**
  * Check the shape of tabular data before building prompts. Only the headers,
  * columns and a sample of rows are validated, so large files stay cheap.
+ * 检查表格结构与数据规模，以便在生成提示词前提示问题。
  */
 export function validateTabularData(data: TabularData): void {
   TabularDataSchema.parse({ ...data, rows: data.rows.slice(0, 50) });
@@ -255,6 +259,7 @@ export function validateTabularData(data: TabularData): void {
 /**
  * Generate a text summary of tabular data for AI consumption.
  * If the consumer doesn't provide a `dataSummary`, this is used automatically.
+ * 整理表头、类型及样例值形成模型输入摘要。
  */
 export function summarizeTabularData(data: TabularData): string {
   const lines: string[] = [];
@@ -304,6 +309,7 @@ export function summarizeTabularData(data: TabularData): string {
  * const summary = generateDataSummary(data);
  * // "Dataset with 150 rows and 4 columns.\n\nColumns:\n- name (text): 120 unique values..."
  * ```
+ * 生成包含字段类型、统计值和质量信息的表格摘要。
  */
 export function generateDataSummary(data: TabularData): string {
   const summary: string[] = [];
@@ -391,6 +397,7 @@ const MAX_GROUPS = 50;
 /** Groups listed per breakdown (largest first); the rest are counted. */
 const SHOWN_GROUPS = 10;
 
+/** 计算指定日期列中可解析的最早与最晚日期。 */
 function dateRange(data: TabularData, index: number) {
   const values = data.rows.map((row) => row[index] ?? "");
   const order = detectDateOrder(values);
@@ -407,6 +414,7 @@ function dateRange(data: TabularData, index: number) {
   return { count, first: first?.text, last: last?.text };
 }
 
+/** 把数值列的汇总结果组合为模型可读的文本。 */
 function formatTotals(
   title: string,
   totals: Map<string, { sum: number; count: number }>,
@@ -428,6 +436,7 @@ function formatTotals(
 /**
  * Sums of up to 3 numeric columns per value of up to 4 low-cardinality text
  * columns, and per month (or year) of the first date column.
+ * 按低基数字段和日期周期汇总数值列。
  */
 function summarizeGroups(data: TabularData): string[] {
   const numeric = data.columns.filter((c) => c.type === "number").slice(0, 3);
@@ -444,6 +453,7 @@ function summarizeGroups(data: TabularData): string[] {
     })
     .slice(0, 4);
 
+  /** 按调用方给出的分组键累加数值列。 */
   const accumulate = (key: (row: string[]) => string | null) =>
     (numeric.length ? numeric : [null]).map((num) => {
       const totals = new Map<string, { sum: number; count: number }>();
@@ -487,6 +497,7 @@ function summarizeGroups(data: TabularData): string[] {
       }
       const span = (max - min) / (1000 * 60 * 60 * 24 * 31);
       const monthly = span <= 36;
+      /** 从一行的日期值提取当前汇总需要的周期键。 */
       const period = (row: string[]) => {
         const t = parseDateValue(row[dateCol.index] ?? "", order);
         if (t === null) return null;
@@ -508,6 +519,7 @@ function summarizeGroups(data: TabularData): string[] {
 
 // ============ Model Resolution ============
 
+/** 按模型实例拥有的接口区分模型与配置对象。 */
 function isLanguageModel(input: unknown): input is LanguageModel {
   return (
     typeof input === "object" &&
@@ -530,6 +542,7 @@ function isLanguageModel(input: unknown): input is LanguageModel {
  *
  * const model = createModel({ apiKey: "sk-...", model: "gpt-4o" });
  * ```
+ * 将底层模型配置转换成可直接请求的模型实例。
  */
 export function createModel(config: AIConfig): LanguageModel {
   const parsed = AIConfigSchema.parse(config);
@@ -560,10 +573,12 @@ export function createModel(config: AIConfig): LanguageModel {
  * });
  * ```
  */
+/** 通过提供商注册表解析应用配置并创建模型。 */
 export function createAppModel(config: AppModelConfig): LanguageModel {
   return createSettingsModel({ ...config, model: config.model ?? "" });
 }
 
+/** 识别由应用层提供商配置组成的模型参数。 */
 function isAppModelConfig(input: unknown): input is AppModelConfig {
   if (typeof input !== "object" || input === null) return false;
   if ("doGenerate" in input) return false; // LanguageModel
@@ -577,6 +592,7 @@ function isAppModelConfig(input: unknown): input is AppModelConfig {
   );
 }
 
+/** 兼容直接传入模型实例或传入配置的两种调用方式。 */
 export function resolveModel(input: ModelInput): LanguageModel {
   if (isLanguageModel(input)) return input;
   if (isAppModelConfig(input)) return createAppModel(input);
@@ -585,6 +601,7 @@ export function resolveModel(input: ModelInput): LanguageModel {
 
 // ============ Prompts ============
 
+/** 构造图表建议请求使用的系统指令。 */
 const getChartSystemPrompt = (
   columns: string[],
   language?: string,
@@ -614,6 +631,7 @@ CHART TYPE GUIDELINES:
 - scatter: Show correlations (xColumn=numeric, yColumn=numeric, aggregation=none)
 - area: Show cumulative trends (xColumn=date/time, yColumn=numeric)`;
 
+/** 把用户绘图要求和数据概况合并为请求内容。 */
 const getCustomChartPrompt = (
   columns: string[],
   language?: string,
@@ -628,6 +646,7 @@ IMPORTANT: Column names MUST exactly match the list above.`;
 
 // ============ Helpers ============
 
+/** 把模型生成的图表配置转换为共用图表类型。 */
 function mapChartResult(
   raw: z.infer<typeof ChartSuggestionSchema>,
   id: string,
@@ -653,11 +672,13 @@ function mapChartResult(
  * Map the columns of a suggested chart onto the real headers (case-insensitive).
  * Returns null when the X column, or the Y column of a non-count chart, does not exist;
  * an unknown group column is dropped.
+ * 按实际表头纠正模型建议的列名大小写。
  */
 function matchChartColumns(
   raw: z.infer<typeof ChartSuggestionSchema>,
   headers: string[],
 ): z.infer<typeof ChartSuggestionSchema> | null {
+  /** 寻找与给定列名匹配的真实表头。 */
   const find = (name: string | undefined) =>
     name === undefined
       ? undefined
@@ -760,6 +781,7 @@ export interface RepairChartOptions {
  *   language: "French",
  * });
  * ```
+ * 请求多条数据可视化建议，并统一处理模型错误。
  */
 export async function suggestCharts(
   options: SuggestChartsOptions,
@@ -802,6 +824,7 @@ export async function suggestCharts(
  *   prompt: "Show me a bar chart of sales by category",
  * });
  * ```
+ * 根据用户的绘图要求生成一条图表配置。
  */
 export async function suggestCustomChart(
   options: SuggestCustomChartOptions,
@@ -848,6 +871,7 @@ export async function suggestCustomChart(
  *   errorContext: "Column 'revenue' does not exist",
  * });
  * ```
+ * 把失败配置和错误信息交给模型，尝试修复图表配置。
  */
 export async function repairChart(
   options: RepairChartOptions,

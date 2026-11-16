@@ -70,7 +70,7 @@ pnpm preview:local
 
 ```sh
 pnpm lint
-pnpm typecheck
+pnpm build
 pnpm test:all
 pnpm test:e2e:growth
 ```
@@ -79,7 +79,8 @@ pnpm test:e2e:growth
 - [服务端设计与接口](docs/phase3-design.md)
 - [本土知识来源](docs/phase3-sources.md)
 - [前端设计约定](docs/frontend-design.md)
+- [依赖安全、许可证与人工复核](docs/security-review.md)
 
 ## 许可证
 
-项目遵循 [MIT 许可证](LICENSE)。上游代码来源与复用范围见 [UPSTREAM.json](UPSTREAM.json)。
+项目遵循 [MIT 许可证](LICENSE)。上游代码来源与复用范围见 [UPSTREAM.json](UPSTREAM.json)。分发声明见 [第三方许可证](public/THIRD-PARTY-NOTICES.txt)。

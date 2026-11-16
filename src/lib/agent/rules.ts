@@ -17,6 +17,7 @@ export type Diagnosis = {
   synthetic: boolean;
   knowledge_ids: string[];
 };
+/** 将指标引用解析为面向用户的诊断观察。 */
 export function withObservation(
   input: RecommendationInput,
   registry: ReturnType<typeof evidenceRegistry>,
@@ -28,12 +29,14 @@ export function withObservation(
       .join("；"),
   };
 }
+/** 按可用指标和证据挑选离线建议，并限制结果数量。 */
 export function rulesFromSnapshot(
   snapshot: MetricSnapshot,
   synthetic: boolean,
 ): Diagnosis {
   const registry = evidenceRegistry(snapshot);
   const recommendations: RecommendationInput[] = [];
+  /** 把单条规则建议连同已登记的证据加入候选结果。 */
   const add = (recommendation: RecommendationInput) =>
     recommendations.push(recommendation);
   if (snapshot.totals.missing_fields.length)
@@ -149,6 +152,7 @@ export function rulesFromSnapshot(
     ].filter((id) => KNOWLEDGE_CARDS.some((card) => card.knowledge_id === id)),
   };
 }
+/** 重算请求范围的经营指标，并返回离线建议及其证据。 */
 export function offlineDiagnosis(input: DiagnosisRequest): Diagnosis {
   const snapshot = computeMetrics(input.rows, input.filters);
   if (!snapshot.totals.line_count)

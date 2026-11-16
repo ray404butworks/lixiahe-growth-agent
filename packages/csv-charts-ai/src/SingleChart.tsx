@@ -42,6 +42,7 @@ export interface SingleChartProps {
   unstyled?: boolean;
 }
 
+/** 渲染单张图表及其筛选、排序和导出操作。 */
 export function SingleChart({
   data,
   chart,
@@ -92,6 +93,7 @@ export function SingleChart({
       ? "stack"
       : undefined;
 
+  /** 请求重新生成这张图的配置，并同步处理等待和错误状态。 */
   const handleRegenerate = async () => {
     if (!onRegenerate) return;
     setIsRegenerating(true);
@@ -105,6 +107,7 @@ export function SingleChart({
   const handleExportCSV = useCallback(() => {
     if (processedData.length === 0) return;
 
+    /** 将图表导出单元格转成合规 CSV 字段。 */
     const escapeField = (v: string) => `"${v.replace(/"/g, '""')}"`;
     const headers = Object.keys(processedData[0] ?? {})
       .map(escapeField)
@@ -241,6 +244,7 @@ export function SingleChart({
       // Fallback — Image element approach
       const url = URL.createObjectURL(svgBlob);
       const img = new Image();
+      /** 图表 SVG 加载成功后绘制到 Canvas 并下载 PNG。 */
       img.onload = () => {
         const canvas = document.createElement("canvas");
         const scale = 2;
@@ -266,11 +270,13 @@ export function SingleChart({
           setTimeout(() => URL.revokeObjectURL(pngUrl), 3000);
         }, "image/png");
       };
+      /** 图像加载失败时释放临时地址。 */
       img.onerror = () => URL.revokeObjectURL(url);
       img.src = url;
     }
   }, [chart.title, theme.tooltipBackground, getSvgString]);
 
+  /** 切换排序状态，连续选择同一方向时回到默认顺序。 */
   const toggleSort = () => {
     setSortOrder((prev) => {
       if (prev === "none") return "desc";
@@ -280,6 +286,7 @@ export function SingleChart({
   };
 
   // Render chart content helper
+  /** 按配置中的图表类型生成对应的 Recharts 组件。 */
   const renderChartContent = (
     type: ChartType,
     chartData: ChartDataPoint[],

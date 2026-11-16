@@ -38,6 +38,7 @@ const svgProps = {
   strokeLinejoin: "round" as const,
 };
 
+/** 绘制默认刷新图标。 */
 function DefaultRefreshCw({ className }: ChartIconProps) {
   return (
     <svg {...svgProps} className={className}>
@@ -48,6 +49,7 @@ function DefaultRefreshCw({ className }: ChartIconProps) {
   );
 }
 
+/** 绘制默认下载图标。 */
 function DefaultDownload({ className }: ChartIconProps) {
   return (
     <svg {...svgProps} className={className}>
@@ -58,6 +60,7 @@ function DefaultDownload({ className }: ChartIconProps) {
   );
 }
 
+/** 绘制默认升序图标。 */
 function DefaultSortAsc({ className }: ChartIconProps) {
   return (
     <svg {...svgProps} className={className}>
@@ -67,6 +70,7 @@ function DefaultSortAsc({ className }: ChartIconProps) {
   );
 }
 
+/** 绘制默认降序图标。 */
 function DefaultSortDesc({ className }: ChartIconProps) {
   return (
     <svg {...svgProps} className={className}>
@@ -76,6 +80,7 @@ function DefaultSortDesc({ className }: ChartIconProps) {
   );
 }
 
+/** 绘制默认重置图标。 */
 function DefaultRotateCcw({ className }: ChartIconProps) {
   return (
     <svg {...svgProps} className={className}>
@@ -85,6 +90,7 @@ function DefaultRotateCcw({ className }: ChartIconProps) {
   );
 }
 
+/** 绘制默认趋势图标。 */
 function DefaultTrendingUp({ className }: ChartIconProps) {
   return (
     <svg {...svgProps} className={className}>
@@ -94,6 +100,7 @@ function DefaultTrendingUp({ className }: ChartIconProps) {
   );
 }
 
+/** 绘制默认筛选图标。 */
 function DefaultFilter({ className }: ChartIconProps) {
   return (
     <svg {...svgProps} className={className}>
@@ -102,6 +109,7 @@ function DefaultFilter({ className }: ChartIconProps) {
   );
 }
 
+/** 绘制默认图像导出图标。 */
 function DefaultImageIcon({ className }: ChartIconProps) {
   return (
     <svg {...svgProps} className={className}>
@@ -143,6 +151,7 @@ const ChartIconContext = createContext<ChartIconSet>(defaultIcons);
  *   <ChartDisplay data={data} charts={charts} />
  * </ChartIconProvider>
  * ```
+ * 合并调用方提供的图标与内置图标。
  */
 export function ChartIconProvider({
   icons,
@@ -159,7 +168,7 @@ export function ChartIconProvider({
   );
 }
 
-/** Get the current icon set from context. */
+/** 读取最近一层图表图标配置。 Get the current icon set from context. */
 export function useChartIcons(): ChartIconSet {
   return useContext(ChartIconContext);
 }

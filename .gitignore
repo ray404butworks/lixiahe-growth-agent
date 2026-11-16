@@ -18,8 +18,7 @@ db.sqlite
 /out/
 next-env.d.ts
 
-# generated at build time
-/public/version.json
+/preview/
 
 # production
 /build
@@ -56,9 +55,6 @@ yarn-error.log*
 # Browser tests
 /test-results/
 /playwright-report/
-
-# model catalog fallback, written at build time (pnpm fetch-models)
-/public/models.json
 
 # Bundled phase-three local server
 /server-dist/

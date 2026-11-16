@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     charts: "src/charts.ts",
+    tabular: "src/tabular.ts",
   },
   format: ["esm"],
   dts: true,

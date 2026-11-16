@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-CSV AI Analyzer — a Next.js app for analyzing CSV and Excel (.xlsx) files with AI. The core logic lives in the standalone npm package `csv-charts-ai` in `packages/csv-charts-ai/`.
+Lixiahe Growth Agent is a Next.js workspace for sales imports, operating metrics, diagnosis, marketing drafts, and reports. The upstream data utilities remain available in the standalone `csv-charts-ai` package.
 
 ## Commands
 
@@ -16,7 +16,7 @@ pnpm typecheck        # TypeScript type checking (tsc --noEmit)
 # Package (csv-charts-ai)
 cd packages/csv-charts-ai
 pnpm build            # Build package with tsup
-pnpm test             # Run vitest tests (173 tests)
+pnpm test             # Run Vitest tests
 pnpm test:watch       # Run tests in watch mode
 ```
 
@@ -33,23 +33,11 @@ The project uses prettier via eslint (`prettier/prettier` rule). Use `pnpm lint:
 
 ## Architecture
 
-- **App**: Next.js 16 (App Router) in `src/`
-- **Package** (`csv-charts-ai`): The "brain" of the project — bundles core deps (`ai`, `zod`, `read-excel-file`) and provides a **pluggable provider registry** (`registerProvider` / `fromSDK`) so consumers install only the AI SDKs they need (`@ai-sdk/openai`, `@ai-sdk/anthropic`, etc.) as optional peer deps. Chart components use a pluggable icon system (`ChartIconProvider`) — no `lucide-react` dependency. Only `react` and `recharts` remain as optional peer deps (for chart components).
-- **State**: React local state + page-level props drilling + external store for AI chat (`src/lib/chat-store.ts`)
-- **File parsing**: App uses PapaParse for CSV (`src/lib/csv-parser.ts`) and delegates to the package for XLSX. The package has its own zero-dep CSV parser.
-- **AI service**: `src/lib/ai-service.ts` registers AI providers (`openai`, `anthropic`, `google`, `mistral`) at import time, then bridges app settings to the package's `createAppModel()`. All AI logic is delegated to the package.
-- **Fullscreen**: `FullscreenCard` uses CSS `position: fixed` (not portals) to preserve child component state
-- **Styling**: TailwindCSS v4, CSS variable-based theming (dark/light/auto), glass-morphism design
-- **Theming**: `src/lib/theme.tsx` provides `ThemeProvider` with localStorage persistence (`csv-ai-analyzer:theme`; the older `csv-ai-theme` key and cookie are migrated once) + system preference detection. Anti-flash script in `layout.tsx` applies the theme class before first paint.
-
-## Key Conventions
-
-- All components are client-side (`"use client"`)
-- CSV and XLSX both produce the same `CSVData` type (structurally identical to the package's `TabularData`) — the rest of the app is format-agnostic
-- The `csv-charts-ai` package is the central library: AI functions, model resolution, CSV diff, data summary, chart components all live there
-- App-specific concerns (settings storage, PapaParse parsing, chat state, UI components) stay in `src/lib/`
-- **Shared origin**: GitHub Pages serves the app from `maxgfr.github.io`, an origin shared with every other project page of the account (one localStorage quota, one IndexedDB namespace, one cookie jar). Every storage name starts with `csv-ai-analyzer` (`csv-ai-analyzer:settings`, `csv-ai-analyzer-secrets`, `csv-ai-analyzer:theme`); settings under the older `csv-ai-settings` / `csv-ai-secrets` names are moved once, then erased. No cookies are written. llm-connect 1.x does not report a refused write, so `saveApiSettings` reads the settings back and the dialog warns when they only last for the page
-- Delimiter/encoding settings only apply to CSV files; XLSX files are parsed automatically
+- **Workspace** in `src/app/` and `src/styles/`. The shared client workspace owns imported rows, filters, and navigation for the current session.
+- **Data** in `src/lib/growth/`. Preserve existing import validation and exact decimal calculations. The browser uses PapaParse for CSV and `csv-charts-ai/tabular` for shared parsing helpers and Excel.
+- **Local API** in `src/lib/agent/`. `scripts/serve-preview.mjs` serves the static export and bundled API. Diagnosis and marketing generation use local rules by default. Authorized model requests run through the local service.
+- **Shared package** in `packages/csv-charts-ai/`. Preserve its existing public imports and optional providers when changing the app-specific parsing entry.
+- **Validation** uses Vitest and the desktop/mobile Playwright project in `e2e-growth/`. Build the shared package before app type checking on a fresh checkout.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

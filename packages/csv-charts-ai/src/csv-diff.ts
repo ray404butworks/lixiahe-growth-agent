@@ -40,6 +40,7 @@ export interface DiffOptions {
 
 /* ── Diff computation ── */
 
+/** 按所选匹配方式比较两份表格，列出新增、删除和修改。 */
 export function computeDiff(
   primaryData: TabularData,
   compareData: TabularData,
@@ -72,6 +73,7 @@ export function computeDiff(
     bIdx: bHeaderIdx.get(h)!,
   }));
 
+  /** 按两边表头的位置映射逐列找出值的变化。 */
   const getChangedCols = (
     a: (string | number)[],
     b: (string | number)[],
@@ -115,6 +117,7 @@ export function computeDiff(
         changedCols: new Set(),
       });
   } else if (effectiveMode === "content") {
+    /** 为参与匹配的行和值生成稳定的查找键。 */
     const makeKey = (row: (string | number)[], indices: number[]) => {
       let key = "";
       for (const index of indices) {

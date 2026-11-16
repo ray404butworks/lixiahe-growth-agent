@@ -31,6 +31,7 @@ const statuses: Record<string, OrderRow["order_status"]> = {
   已取消: "cancelled",
   交易关闭: "cancelled",
 };
+/** 把可识别的日期和 Excel 序号转换为标准订单日期。 */
 export function normalizeDate(raw: string): string {
   const iso =
     /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[T\s]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)?)?$/.exec(
@@ -50,6 +51,7 @@ export function normalizeDate(raw: string): string {
   }
   return raw;
 }
+/** 按映射逐行校验并整理字段，同时记录拒绝原因和缺失项目。 */
 export function normalizeOrders(
   data: CSVData,
   mapping: Mapping,

@@ -38,6 +38,10 @@
     "./charts": {
       "import": "./dist/charts.js",
       "types": "./dist/charts.d.ts"
+    },
+    "./tabular": {
+      "import": "./dist/tabular.js",
+      "types": "./dist/tabular.d.ts"
     }
   },
   "files": [
@@ -89,6 +93,7 @@
     "@vitest/coverage-v8": "^5.0.4",
     "lucide-react": "^0.556.0",
     "react": "^19.2.4",
+    "react-dom": "19.2.4",
     "recharts": "^3.5.1",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",

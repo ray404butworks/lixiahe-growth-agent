@@ -101,6 +101,7 @@ export const KNOWLEDGE_CARDS: KnowledgeCard[] = [
     ],
   },
 ];
+/** 按商品名匹配已核验的主题卡，并纳入通用卡。 */
 export function knowledgeForProduct(name: string): KnowledgeCard[] {
   const tag = /蟹/.test(name)
     ? "河蟹"

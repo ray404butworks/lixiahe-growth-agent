@@ -60,11 +60,27 @@ describe("本地HTTP接口合同", () => {
     expect(json.model_configured).toBe(false);
     expect(JSON.stringify(json)).not.toContain("apiKey");
   });
-  it("知识接口返回六张来源", async () => {
+  it("已退役的知识路由返回 404", async () => {
     const result = await createAgentHandler()(
       new Request("http://127.0.0.1:8080/api/knowledge"),
     );
-    expect((await result.json()).cards).toHaveLength(6);
+    expect(result.status).toBe(404);
+    expect((await result.json()).code).toBe("NOT_FOUND");
+  });
+  it("仅接受 application/json，可带字符集参数", async () => {
+    const handler = createAgentHandler({ config: BLANK_CONFIG });
+    const invalid = await handler(
+      request("/api/diagnose", demoRequest(), {
+        "Content-Type": "application/json-invalid",
+      }),
+    );
+    expect(invalid.status).toBe(415);
+    const valid = await handler(
+      request("/api/diagnose", demoRequest(), {
+        "Content-Type": "application/json; charset=utf-8",
+      }),
+    );
+    expect(valid.status).toBe(200);
   });
   it("真实诊断接口重算指标，输出request_id", async () => {
     const result = await createAgentHandler({ config: BLANK_CONFIG })(

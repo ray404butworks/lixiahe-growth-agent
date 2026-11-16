@@ -4,8 +4,7 @@ import {
   inferColumnValuesType,
   detectCSVDelimiter,
   uniqueHeaders,
-  generateDataSummary as pkgGenerateDataSummary,
-} from "csv-charts-ai";
+} from "csv-charts-ai/tabular";
 
 export interface CSVColumn {
   name: string;
@@ -36,6 +35,7 @@ export const DEFAULT_CSV_SETTINGS: CSVSettings = {
 
 export const inferColumnType = inferValuesType;
 
+/** 解析 CSV 并返回影响导入判断的列数和引号异常。 */
 export const parseCSVWithDiagnostics = (
   content: string,
   settings: CSVSettings = DEFAULT_CSV_SETTINGS,
@@ -121,6 +121,7 @@ export const parseCSVWithDiagnostics = (
 /**
  * Decode file bytes. A byte order mark wins over the chosen encoding, so
  * UTF-16 exports (Excel "Unicode text") open correctly.
+ * 按所选编码解码文件内容，保留对不同销售表编码的支持。
  */
 export function decodeText(buffer: ArrayBuffer, encoding: string): string {
   const bytes = new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 3));
@@ -135,21 +136,8 @@ export function decodeText(buffer: ArrayBuffer, encoding: string): string {
   return new TextDecoder(bom ?? encoding).decode(buffer);
 }
 
+/** 将 CSV 文本读取为适用于字段映射的表格数据。 */
 export const parseCSV = (
   content: string,
   settings: CSVSettings = DEFAULT_CSV_SETTINGS,
 ): CSVData => parseCSVWithDiagnostics(content, settings).data;
-
-/**
- * Generate a detailed human-readable summary of CSV data.
- * Delegates to the csv-charts-ai package (CSVData is structurally identical to TabularData).
- */
-const summaries = new WeakMap<CSVData, string>();
-export const generateDataSummary = (data: CSVData): string => {
-  let summary = summaries.get(data);
-  if (summary === undefined) {
-    summary = pkgGenerateDataSummary(data);
-    summaries.set(data, summary);
-  }
-  return summary;
-};

@@ -8,6 +8,7 @@ import {
   totalUnits,
 } from "./money";
 export type Filters = { start?: string; end?: string; channel?: string };
+/** 计算两个周期的变化率，并处理上期为零和缺失数据。 */
 export function growthRate(current: string | null, prior: string | null) {
   if (current === null || prior === null)
     return { status: "unavailable", value: null } as const;
@@ -21,6 +22,7 @@ export function growthRate(current: string | null, prior: string | null) {
     value: roundedRatio(now - previous, previous),
   } as const;
 }
+/** 以定点数精确汇总订单、销售、退款和贡献毛益。 */
 export function summarize(rows: readonly OrderRow[]) {
   let gross = 0n,
     refunds = 0n,
@@ -79,6 +81,7 @@ export function summarize(rows: readonly OrderRow[]) {
 }
 export type Totals = ReturnType<typeof summarize>;
 export type Group = Totals & { key: string; name: string };
+/** 根据日期和渠道筛选有效订单，再生成总览、分组及周期对比。 */
 export function computeMetrics(
   input: readonly OrderRow[],
   filters: Filters = {},
@@ -98,6 +101,7 @@ export function computeMetrics(
       (!filters.channel || row.channel === filters.channel),
   );
   const rows = ranged.filter((row) => row.order_status !== "cancelled");
+  /** 按指定经营维度分组，并使用同一指标口径汇总每组。 */
   const aggregate = (key: "channel" | "sku" | "order_date"): Group[] => {
     const groups = new Map<string, OrderRow[]>();
     for (const row of rows) {
@@ -116,6 +120,7 @@ export function computeMetrics(
   const dates = rows.map((row) => row.order_date).sort();
   // Compare the last 7 calendar days in the selected period against the preceding 7.
   const end = filters.end ?? dates.at(-1);
+  /** 按 UTC 日历移动日期，避免本地时区导致范围偏移。 */
   const offset = (date: string, days: number) =>
     new Date(Date.parse(`${date}T00:00:00Z`) + days * 86400000)
       .toISOString()

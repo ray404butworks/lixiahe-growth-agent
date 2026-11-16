@@ -91,6 +91,7 @@ export type Mapping = Partial<Record<FieldKey, string>>;
 const decimal = z
   .string()
   .regex(/^\d{1,18}(\.\d{1,8})?$/, "须为非负十进制数，最多8位小数");
+/** 校验年月日格式和日期实际存在性。 */
 export function validDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const parsed = new Date(`${value}T00:00:00Z`);
@@ -136,6 +137,7 @@ export const orderSchema = z
     }
   });
 export type OrderRow = z.infer<typeof orderSchema>;
+/** 用识别到的表头和字段别名生成可编辑的初始映射。 */
 export function autoMap(headers: readonly string[]): Mapping {
   const mapping: Mapping = {};
   for (const field of FIELDS) {

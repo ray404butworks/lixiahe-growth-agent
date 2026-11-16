@@ -9,6 +9,7 @@ with (root / 'public/templates/normal.csv').open(encoding='utf-8-sig') as handle
     values = list(csv.reader(handle))
 
 def style(sheet):
+    """设置模板工作表的表头、列宽和冻结行。"""
     sheet.freeze_panes = 'A2'
     sheet.auto_filter.ref = sheet.dimensions
     for cell in sheet[1]:

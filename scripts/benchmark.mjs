@@ -21,8 +21,11 @@ for (const rows of [1000, 10000, 100000]) {
     rows: Array.from({ length: rows }, () => ["same", "2", "g"]),
   };
   const cases = {
+    /** 测量表格文本解析耗时。 */
     parse: () => parseCSV(csv),
+    /** 测量数据摘要生成耗时。 */
     summary: () => generateDataSummary(data),
+    /** 测量图表数据聚合耗时。 */
     chart: () =>
       processChartData(data, {
         type: "bar",
@@ -30,10 +33,14 @@ for (const rows of [1000, 10000, 100000]) {
         yAxis: "value",
         aggregation: "sum",
       }),
+    /** 测量普通表格比对耗时。 */
     diff: () => computeDiff(data, data, { matchMode: "content" }),
+    /** 用高重复度表格测量比对耗时。 */
     duplicateDiff: () =>
       computeDiff(duplicates, duplicates, { matchMode: "content" }),
+    /** 测量按数值筛选行的耗时。 */
     filter: () => data.rows.filter((row) => Number(row[1]) > 500),
+    /** 测量按数值排序的耗时。 */
     sort: () => [...data.rows].sort((a, b) => Number(a[1]) - Number(b[1])),
   };
   for (const [operation, run] of Object.entries(cases)) {

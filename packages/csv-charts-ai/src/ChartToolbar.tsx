@@ -23,6 +23,7 @@ interface ChartToolbarProps {
   unstyled?: boolean;
 }
 
+/** 展示当前图表支持的排序、导出和重新生成操作。 */
 export function ChartToolbar({
   chartType,
   sortOrder,
@@ -48,7 +49,9 @@ export function ChartToolbar({
   const supportsTrendline =
     chartType === "bar" || chartType === "line" || chartType === "area";
 
+  /** 生成工具栏按钮的默认样式。 */
   const cls = (defaultCls: string) => (unstyled ? "" : defaultCls);
+  /** 为排序等可切换操作附加激活样式。 */
   const activeCls = (
     active: boolean,
     activeCls: string,

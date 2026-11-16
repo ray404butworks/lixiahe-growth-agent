@@ -13,6 +13,7 @@ const chineseFinancialNumber =
   /(?:销售额|营收|利润|毛益|退款金额|销量|增长率|贡献率).{0,4}[零〇一二三四五六七八九十百千万亿两壹贰叁肆伍陆柒捌玖拾佰仟]/;
 const instructionLeak =
   /api\s*key|密钥|system\s*:|忽略.{0,8}(指令|规则)|泄露|<\/?script/i;
+/** 拒绝未经核验的数字、认证承诺或指令性内容。 */
 function proseSafe(text: string) {
   return (
     !numericClaim.test(text) &&
@@ -21,6 +22,7 @@ function proseSafe(text: string) {
     !instructionLeak.test(text)
   );
 }
+/** 校验模型建议的结构、证据引用和文本，确保可回连当前快照。 */
 export function validateDiagnosisModel(
   value: unknown,
   evidence: Record<string, Evidence>,
@@ -54,6 +56,7 @@ export function validateDiagnosisModel(
   }
   return parsed;
 }
+/** 校验模型草稿字段及事实引用，再交给模板渲染。 */
 export function validateMarketingModel(value: unknown, facts: ProductFacts) {
   const parsed = marketingModelSchema.parse(value);
   const texts = [

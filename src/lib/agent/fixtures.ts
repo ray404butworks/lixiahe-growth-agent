@@ -2,6 +2,7 @@
 import { generateDemo } from "../growth/demo";
 import type { ContentRequest, DiagnosisRequest } from "./schema";
 import type { ModelConfig } from "./server-model";
+/** 生成正常经营样例的诊断请求，供本地验证使用。 */
 export function demoRequest(): DiagnosisRequest {
   return {
     rows: generateDemo(),
@@ -10,6 +11,7 @@ export function demoRequest(): DiagnosisRequest {
     allow_model: false,
   };
 }
+/** 用同一份测试账本生成与诊断匹配的营销请求。 */
 export function demoContent(): ContentRequest {
   return {
     ...demoRequest(),

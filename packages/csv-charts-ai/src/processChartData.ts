@@ -34,6 +34,7 @@ interface Stats {
   max: number;
 }
 
+/** 建立分组聚合使用的计数和数值状态。 */
 const newStats = (): Stats => ({
   sum: 0,
   count: 0,
@@ -41,6 +42,7 @@ const newStats = (): Stats => ({
   max: -Infinity,
 });
 
+/** 将一个有效数值加入分组统计。 */
 function accumulate(stats: Stats, value: number | null) {
   stats.count++;
   if (value === null) return;
@@ -49,6 +51,7 @@ function accumulate(stats: Stats, value: number | null) {
   if (value > stats.max) stats.max = value;
 }
 
+/** 按图表要求从统计状态读出计数、求和或其他聚合值。 */
 function aggregate(stats: Stats, aggregation: ChartConfig["aggregation"]) {
   switch (aggregation) {
     case "avg":
@@ -64,6 +67,7 @@ function aggregate(stats: Stats, aggregation: ChartConfig["aggregation"]) {
   }
 }
 
+/** 处理单个数值系列的图表数据。 */
 export const processChartData = (
   data: TabularData,
   chart: ChartConfig,
@@ -74,6 +78,7 @@ export const processChartData = (
   return result.data;
 };
 
+/** 按图表类型处理多个数值系列，统一筛选和分组。 */
 export const processChartDataMultiSeries = (
   data: TabularData,
   chart: ChartConfig,
@@ -224,6 +229,7 @@ export const processChartDataMultiSeries = (
       yKey: yCol,
     };
 
+  /** 读取当前数值系列用于图表点排序的值。 */
   const valueOf = (p: ChartDataPoint) => (p[yCol] as number | null) ?? 0;
   let selected = selectPoints(points, valueOf, sortOrder, limit, {
     chronological,
@@ -248,6 +254,7 @@ export const processChartDataMultiSeries = (
   return { data: selected, seriesKeys: [], yKey: yCol };
 };
 
+/** 清除类别两端空白，使分组键保持一致。 */
 const plainKey = (raw: string) => raw.trim();
 
 /**
@@ -255,6 +262,7 @@ const plainKey = (raw: string) => raw.trim();
  * or its month ("2024-03") when there are more dates than `limit`, or its year
  * when there are still more months. Without it a year of daily rows would be
  * cut to its last `limit` days.
+ * 生成按日、月或年分组的日期键提取方法。
  */
 function dateBuckets(
   data: TabularData,
@@ -266,6 +274,7 @@ function dateBuckets(
   const raws = data.rows.map((row) => String(row[xColDef.index] ?? "").trim());
   if (new Set(raws.filter(Boolean)).size <= limit) return plainKey;
   const order = detectDateOrder(raws);
+  /** 把可解析的输入日期转换成 ISO 格式。 */
   const isoOf = (raw: string) => {
     const time = parseDateValue(raw, order);
     return time === null ? null : new Date(time).toISOString();
@@ -276,6 +285,7 @@ function dateBuckets(
     if (iso) months.add(iso.slice(0, 7));
   }
   const length = months.size <= limit ? 7 : 4;
+  /** 按分桶精度截取日期，保留无法识别的原类别值。 */
   return (raw) => isoOf(raw.trim())?.slice(0, length) ?? raw.trim();
 }
 
@@ -285,6 +295,7 @@ function dateBuckets(
  * trend needs consecutive points; long date ranges are grouped by month before),
  * a raw one keeps its whole range. Other charts keep the `limit` largest points
  * ("Top N") in their original order.
+ * 按图表类型和排序要求挑选并排列可视化数据点。
  */
 function selectPoints(
   points: ChartDataPoint[],
@@ -349,7 +360,7 @@ function selectPoints(
   return points.filter((p) => top.has(p));
 }
 
-/** Scatter keeps every point (up to a cap) with a numeric x when the column is numeric. */
+/** 保留上限内的散点，并转换横纵坐标为绘图可用值。 Scatter keeps every point (up to a cap) with a numeric x when the column is numeric. */
 function scatterPoints(
   points: ChartDataPoint[],
   xCol: string,

@@ -7,7 +7,6 @@ import {
   type ModelConfig,
 } from "./server-model";
 import { contentRequestSchema, diagnosisRequestSchema } from "./schema";
-import { KNOWLEDGE_CARDS } from "../knowledge/cards";
 type HandlerOptions = {
   config?: ModelConfig;
   transport?: typeof fetch;
@@ -19,6 +18,7 @@ type HandlerOptions = {
 };
 const LIMIT = 8 * 1024 * 1024;
 class HttpError extends Error {
+  /** 记录可公开返回的 HTTP 状态、错误码和错误说明。 */
   constructor(
     public status: number,
     public code: string,
@@ -27,12 +27,10 @@ class HttpError extends Error {
     super(message);
   }
 }
+/** 流式读取 UTF-8 JSON，并在累计超过字节限制时立即停止。 */
 async function readJSON(request: Request, maxBytes: number): Promise<unknown> {
-  if (
-    !(request.headers.get("content-type") ?? "")
-      .toLowerCase()
-      .startsWith("application/json")
-  )
+  const mediaType = request.headers.get("content-type")?.split(";", 1)[0];
+  if (mediaType?.trim().toLowerCase() !== "application/json")
     throw new HttpError(415, "CONTENT_TYPE", "请使用JSON请求。");
   const reader = request.body?.getReader();
   if (!reader) throw new HttpError(400, "EMPTY_BODY", "请求内容为空。");
@@ -61,6 +59,7 @@ async function readJSON(request: Request, maxBytes: number): Promise<unknown> {
     throw new HttpError(400, "INVALID_JSON", "JSON内容或编码无效。");
   }
 }
+/** 为本地 API 建立处理器，独立持有请求频率、模型配额和短期缓存。 */
 export function createAgentHandler(options: HandlerOptions = {}) {
   const config = options.config ?? modelConfig();
   const configuredDaily = Number(process.env.LIXIAHE_MODEL_DAILY_CALLS ?? 20);
@@ -71,6 +70,7 @@ export function createAgentHandler(options: HandlerOptions = {}) {
       : 20);
   let quotaDate = "",
     calls = 0;
+  /** 按北京时间每日重置模型调用计数，并在配额用尽时交给规则回退。 */
   const transport: typeof fetch = async (input, init) => {
     const date = new Date((options.now ?? Date.now)() + 8 * 3600000)
       .toISOString()
@@ -89,8 +89,10 @@ export function createAgentHandler(options: HandlerOptions = {}) {
   const cache = new Map<string, { expires: number; result: Result }>();
   let windowStart = 0,
     count = 0;
+  /** 核对请求地址、来源和入参，再执行诊断或草稿生成。 */
   return async (request: Request): Promise<Response> => {
     const requestId = crypto.randomUUID();
+    /** 统一设置请求标识、禁用缓存和内容类型保护。 */
     const json = (body: unknown, status = 200) =>
       Response.json(body, {
         status,
@@ -117,8 +119,6 @@ export function createAgentHandler(options: HandlerOptions = {}) {
           version: "0.4.0",
           request_id: requestId,
         });
-      if (request.method === "GET" && path === "/api/knowledge")
-        return json({ cards: KNOWLEDGE_CARDS, request_id: requestId });
       if (!["/api/diagnose", "/api/content"].includes(path))
         throw new HttpError(404, "NOT_FOUND", "接口不存在。");
       if (request.method !== "POST")

@@ -12,6 +12,7 @@ import {
 import "~/styles/report.css";
 import { WorkspaceEmptyState } from "./workspace-empty-state";
 
+/** 展示当前经营范围的报告及打印、文件导出入口。 */
 export function GrowthReportView({
   source,
   onImport,
@@ -30,6 +31,7 @@ export function GrowthReportView({
     );
 
   const report = buildReport(source);
+  /** 按指定格式和编码下载当前报告。 */
   function exportFile(extension: string, body: string, type: string) {
     downloadBlob(new Blob([body], { type }), `${report.filename}.${extension}`);
   }

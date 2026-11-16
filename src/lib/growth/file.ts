@@ -1,4 +1,4 @@
-/** Bound XLSX ZIP expansion before handing a workbook to the upstream parser. */
+/** 读取 XLSX 的 ZIP 目录，提前限制条目数量和预计解压大小。 Bound XLSX ZIP expansion before handing a workbook to the upstream parser. */
 export function validateWorkbookArchive(buffer: ArrayBuffer): void {
   const view = new DataView(buffer);
   let eocd = -1;

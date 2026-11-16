@@ -24,6 +24,7 @@ export const CONTENT_PROMPT =
   COMMON_PROMPT +
   `\n输出 {"video_title":"标题","video_segments":[{"visual":"画面建议","narration":"口播"},{"visual":"画面建议","narration":"口播"},{"visual":"画面建议","narration":"口播"}],"product_copy":"商品文案","social_copy":"社交文案"}。所有商品信息只能用{{name}}、{{specification}}、{{origin}}、{{selling_point}}、{{shipping}}占位符表达，服务端随后替换已确认事实。不得在自由文字中出现数字、产地、配送承诺、认证、营养或味觉断言。不得输出额外字段。`;
 type Dependencies = { transport?: typeof fetch };
+/** 抽取诊断所需的汇总范围、证据和约束，构建模型上下文。 */
 function context(base: Diagnosis) {
   return {
     scope: base.scope,
@@ -40,6 +41,7 @@ function context(base: Diagnosis) {
     })),
   };
 }
+/** 综合本次调用授权与服务端配置，判断是否进入模型路径。 */
 function authorization(
   input: DiagnosisRequest,
   config: ModelConfig,
@@ -48,6 +50,7 @@ function authorization(
     unavailableReason(config) ?? (input.allow_model ? null : "not_authorized")
   );
 }
+/** 先算出可用的离线诊断，有授权且模型输出合法时采用模型建议。 */
 export async function diagnose(
   input: DiagnosisRequest,
   config: ModelConfig,
@@ -95,6 +98,7 @@ export async function diagnose(
   }
   return { ...base, meta: { ...base.meta, fallback_reason: last, attempts } };
 }
+/** 先准备事实和规则草稿，有授权且模型输出通过校验时采用模型草稿。 */
 export async function generateMarketing(
   input: ContentRequest,
   config: ModelConfig,
