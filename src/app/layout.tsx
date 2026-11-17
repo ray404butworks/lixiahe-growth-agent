@@ -1,4 +1,11 @@
 import "~/styles/globals.css";
+import "~/styles/growth.css";
+import "~/styles/agent.css";
+import "~/styles/report.css";
+import "~/styles/dashboard.css";
+import "~/styles/import.css";
+import "~/styles/workspace.css";
+import { BrandWatermark } from "./_components/brand-watermark";
 import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "里下河 · 农企增长 Agent",
@@ -20,7 +27,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body>
+        {children}
+        <BrandWatermark />
+      </body>
     </html>
   );
 }

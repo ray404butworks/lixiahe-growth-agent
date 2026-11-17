@@ -46,7 +46,7 @@
 }
 
 .growth-import .dropzone:hover {
-  border-color: var(--green);
+  border-color: var(--ink);
   background: var(--subtle);
 }
 
@@ -57,9 +57,9 @@
   gap: 8px;
   min-height: 44px;
   padding: 0 14px;
-  border-radius: 4px;
-  background: var(--green);
-  color: #fffdf6;
+  border-radius: var(--radius-control);
+  background: var(--ink);
+  color: var(--subtle);
   font-size: 14px;
   font-weight: 600;
 }
@@ -88,7 +88,7 @@
 
 .growth-import .file-tools .text-button {
   min-height: 34px;
-  color: var(--green);
+  color: var(--ink);
 }
 
 .growth-import .parse-settings {
@@ -132,7 +132,7 @@
   padding: 11px 0;
   border: 0;
   background: transparent;
-  color: var(--green);
+  color: var(--ink);
   text-align: left;
 }
 
@@ -159,5 +159,101 @@
   .growth-import .file-tools .text-button,
   .growth-import .parse-settings summary {
     min-height: 44px;
+  }
+}
+
+/* 上传与样例各自成区，桌面并排、手机顺序堆叠。 */
+.growth-import .import-entry {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+.growth-import .import-entry > .import-panel,
+.growth-import .import-samples {
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+.growth-import .dropzone {
+  min-height: 236px;
+  gap: 14px;
+  padding: 24px;
+  border-radius: var(--radius-control);
+  border-color: var(--control-line);
+  background: var(--subtle);
+  transition:
+    background var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease);
+}
+.growth-import .dropzone:hover {
+  background: #efeff2;
+  border-color: var(--muted);
+}
+.growth-import .dropzone:focus-within {
+  outline-color: var(--focus);
+}
+.growth-import .dropzone .upload-action {
+  padding: 0 18px;
+  background: var(--ink);
+  color: #fff;
+}
+.growth-import .dropzone .upload-formats {
+  font-size: 12px;
+}
+.growth-import .import-entry h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+.growth-import .import-sample-list {
+  margin-top: 22px;
+  border-top: 0;
+}
+.growth-import .import-sample-list li:last-child {
+  border-bottom: 0;
+}
+.growth-import .import-sample-list button {
+  min-height: 64px;
+  padding: 16px 12px;
+  color: var(--ink);
+  border-radius: 9px;
+  font-size: 14px;
+  transition: background var(--motion-fast) var(--motion-ease);
+}
+.growth-import .import-sample-list button svg {
+  color: var(--muted);
+  width: 16px;
+}
+.growth-import .parse-settings {
+  margin-top: 12px;
+}
+.growth-import .parse-settings summary {
+  font-size: 13px;
+}
+@media (min-width: 1600px) {
+  .growth-import .dropzone {
+    min-height: 260px;
+  }
+}
+@media (max-width: 900px) {
+  .growth-import .import-entry {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .growth-import .import-entry > .import-panel,
+  .growth-import .import-samples {
+    padding: 20px;
+  }
+  .growth-import .dropzone {
+    min-height: 200px;
+    padding: 18px 12px;
+  }
+  .growth-import .import-sample-list {
+    margin-top: 14px;
+  }
+  .growth-import .import-sample-list button {
+    min-height: 60px;
+    padding-inline: 8px;
   }
 }

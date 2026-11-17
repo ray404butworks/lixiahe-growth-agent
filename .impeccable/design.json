@@ -1,0 +1,479 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-17T22:07:34.3999006Z",
+  "title": "Design System: 里下河农企增长 Agent",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "paper",
+        "canonical": "#f5f5f7",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "surface",
+        "canonical": "#fff",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "sidebar": {
+        "role": "neutral",
+        "displayName": "sidebar",
+        "canonical": "#fafafa",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "subtle",
+        "canonical": "#f5f5f7",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "selected": {
+        "role": "neutral",
+        "displayName": "selected",
+        "canonical": "#e9e9ed",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "ink",
+        "canonical": "#1d1d1f",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "muted",
+        "canonical": "#6e6e73",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "line",
+        "canonical": "#e5e5ea",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "control-line": {
+        "role": "neutral",
+        "displayName": "control-line",
+        "canonical": "#c7c7cc",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "accent",
+        "canonical": "#007aff",
+        "tonalRamp": [
+          "oklch(15% 0.17 264)",
+          "oklch(27% 0.17 264)",
+          "oklch(39% 0.17 264)",
+          "oklch(51% 0.17 264)",
+          "oklch(63% 0.17 264)",
+          "oklch(75% 0.17 264)",
+          "oklch(87% 0.17 264)",
+          "oklch(95% 0.17 264)"
+        ]
+      },
+      "link": {
+        "role": "primary",
+        "displayName": "link",
+        "canonical": "#0066cc",
+        "tonalRamp": [
+          "oklch(15% 0.16 256)",
+          "oklch(27% 0.16 256)",
+          "oklch(39% 0.16 256)",
+          "oklch(51% 0.16 256)",
+          "oklch(63% 0.16 256)",
+          "oklch(75% 0.16 256)",
+          "oklch(87% 0.16 256)",
+          "oklch(95% 0.16 256)"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "focus",
+        "canonical": "#007aff",
+        "tonalRamp": [
+          "oklch(15% 0.17 264)",
+          "oklch(27% 0.17 264)",
+          "oklch(39% 0.17 264)",
+          "oklch(51% 0.17 264)",
+          "oklch(63% 0.17 264)",
+          "oklch(75% 0.17 264)",
+          "oklch(87% 0.17 264)",
+          "oklch(95% 0.17 264)"
+        ]
+      },
+      "success": {
+        "role": "primary",
+        "displayName": "success",
+        "canonical": "#287747",
+        "tonalRamp": [
+          "oklch(15% 0.08 150)",
+          "oklch(27% 0.08 150)",
+          "oklch(39% 0.08 150)",
+          "oklch(51% 0.08 150)",
+          "oklch(63% 0.08 150)",
+          "oklch(75% 0.08 150)",
+          "oklch(87% 0.08 150)",
+          "oklch(95% 0.08 150)"
+        ]
+      },
+      "success-surface": {
+        "role": "primary",
+        "displayName": "success-surface",
+        "canonical": "#edf6ef",
+        "tonalRamp": [
+          "oklch(15% 0.02 150)",
+          "oklch(27% 0.02 150)",
+          "oklch(39% 0.02 150)",
+          "oklch(51% 0.02 150)",
+          "oklch(63% 0.02 150)",
+          "oklch(75% 0.02 150)",
+          "oklch(87% 0.02 150)",
+          "oklch(95% 0.02 150)"
+        ]
+      },
+      "warning": {
+        "role": "primary",
+        "displayName": "warning",
+        "canonical": "#865a15",
+        "tonalRamp": [
+          "oklch(15% 0.09 75)",
+          "oklch(27% 0.09 75)",
+          "oklch(39% 0.09 75)",
+          "oklch(51% 0.09 75)",
+          "oklch(63% 0.09 75)",
+          "oklch(75% 0.09 75)",
+          "oklch(87% 0.09 75)",
+          "oklch(95% 0.09 75)"
+        ]
+      },
+      "warning-surface": {
+        "role": "primary",
+        "displayName": "warning-surface",
+        "canonical": "#fff7e8",
+        "tonalRamp": [
+          "oklch(15% 0.025 80)",
+          "oklch(27% 0.025 80)",
+          "oklch(39% 0.025 80)",
+          "oklch(51% 0.025 80)",
+          "oklch(63% 0.025 80)",
+          "oklch(75% 0.025 80)",
+          "oklch(87% 0.025 80)",
+          "oklch(95% 0.025 80)"
+        ]
+      },
+      "danger": {
+        "role": "primary",
+        "displayName": "danger",
+        "canonical": "#b13a32",
+        "tonalRamp": [
+          "oklch(15% 0.14 28)",
+          "oklch(27% 0.14 28)",
+          "oklch(39% 0.14 28)",
+          "oklch(51% 0.14 28)",
+          "oklch(63% 0.14 28)",
+          "oklch(75% 0.14 28)",
+          "oklch(87% 0.14 28)",
+          "oklch(95% 0.14 28)"
+        ]
+      },
+      "danger-surface": {
+        "role": "primary",
+        "displayName": "danger-surface",
+        "canonical": "#fff1ef",
+        "tonalRamp": [
+          "oklch(15% 0.02 28)",
+          "oklch(27% 0.02 28)",
+          "oklch(39% 0.02 28)",
+          "oklch(51% 0.02 28)",
+          "oklch(63% 0.02 28)",
+          "oklch(75% 0.02 28)",
+          "oklch(87% 0.02 28)",
+          "oklch(95% 0.02 28)"
+        ]
+      },
+      "chart-primary": {
+        "role": "secondary",
+        "displayName": "chart-primary",
+        "canonical": "#637c9c",
+        "tonalRamp": [
+          "oklch(15% 0.06 255)",
+          "oklch(27% 0.06 255)",
+          "oklch(39% 0.06 255)",
+          "oklch(51% 0.06 255)",
+          "oklch(63% 0.06 255)",
+          "oklch(75% 0.06 255)",
+          "oklch(87% 0.06 255)",
+          "oklch(95% 0.06 255)"
+        ]
+      },
+      "chart-secondary": {
+        "role": "secondary",
+        "displayName": "chart-secondary",
+        "canonical": "#c3cbd6",
+        "tonalRamp": [
+          "oklch(15% 0.02 255)",
+          "oklch(27% 0.02 255)",
+          "oklch(39% 0.02 255)",
+          "oklch(51% 0.02 255)",
+          "oklch(63% 0.02 255)",
+          "oklch(75% 0.02 255)",
+          "oklch(87% 0.02 255)",
+          "oklch(95% 0.02 255)"
+        ]
+      },
+      "chart-fill": {
+        "role": "secondary",
+        "displayName": "chart-fill",
+        "canonical": "#edf1f6",
+        "tonalRamp": [
+          "oklch(15% 0.015 255)",
+          "oklch(27% 0.015 255)",
+          "oklch(39% 0.015 255)",
+          "oklch(51% 0.015 255)",
+          "oklch(63% 0.015 255)",
+          "oklch(75% 0.015 255)",
+          "oklch(87% 0.015 255)",
+          "oklch(95% 0.015 255)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "页面标题",
+        "purpose": "主要任务标题；手机使用28px覆盖。"
+      },
+      "title": {
+        "displayName": "分区标题",
+        "purpose": "面板与业务分组标题。"
+      },
+      "body": {
+        "displayName": "系统正文",
+        "purpose": "工作台基础正文；继承系统字体。"
+      },
+      "label": {
+        "displayName": "表单标签",
+        "purpose": "标签与辅助说明。"
+      },
+      "caption": {
+        "displayName": "小号说明",
+        "purpose": "来源、图例与次级说明。"
+      },
+      "metric": {
+        "displayName": "指标数字",
+        "purpose": "关键经营数值，使用tabular-nums。"
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "motion-fast",
+        "value": "140ms",
+        "purpose": "按钮、导航与上传区状态过渡。"
+      },
+      {
+        "name": "motion-ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "共享状态过渡；减少动态偏好下停用。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-min",
+        "value": "1600px"
+      },
+      {
+        "name": "workspace-max",
+        "value": "1150px"
+      },
+      {
+        "name": "import-legacy-max",
+        "value": "920px"
+      },
+      {
+        "name": "import-stack-max",
+        "value": "900px"
+      },
+      {
+        "name": "agent-legacy-max",
+        "value": "1050px"
+      },
+      {
+        "name": "mobile-max",
+        "value": "700px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "主按钮",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "石墨黑主操作，沿用原生禁用和键盘焦点。",
+      "html": "<button class=\"ds-primary\">确认导入</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 17px;border:1px solid var(--ink);border-radius:var(--radius-control);background:var(--ink);color:var(--surface);font:500 14px var(--font-sans);cursor:pointer;transition:background var(--motion-fast) var(--motion-ease),border-color var(--motion-fast) var(--motion-ease)}.ds-primary:hover:not(:disabled){background:#39393d;border-color:#39393d}.ds-primary:focus-visible{outline:2px solid var(--focus);outline-offset:3px}.ds-primary:disabled{opacity:.42;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}}"
+    },
+    {
+      "name": "次按钮",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "白底描边的辅助操作。",
+      "html": "<button class=\"ds-secondary\">清除数据</button>",
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 17px;border:1px solid var(--control-line);border-radius:var(--radius-control);background:var(--surface);color:var(--ink);font:500 14px var(--font-sans);cursor:pointer;transition:background var(--motion-fast) var(--motion-ease)}.ds-secondary:hover:not(:disabled){background:var(--subtle)}.ds-secondary:focus-visible{outline:2px solid var(--focus);outline-offset:3px}.ds-secondary:disabled{opacity:.42;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}}"
+    },
+    {
+      "name": "输入框",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "白底原生输入与可见蓝色焦点。",
+      "html": "<label class=\"ds-field\">商品名称<input class=\"ds-input\" placeholder=\"填写商品名称\" /></label>",
+      "css": ".ds-field{display:grid;gap:8px;color:var(--muted);font:13px var(--font-sans)}.ds-input{min-height:40px;padding:9px 12px;border:1px solid var(--control-line);border-radius:var(--radius-control);background:var(--surface);color:var(--ink);font:14px/1.6 var(--font-sans);caret-color:var(--accent)}.ds-input::placeholder{color:var(--muted);opacity:1}.ds-input:focus-visible{outline:2px solid var(--focus);outline-offset:3px}@media(max-width:700px){.ds-input{min-height:44px;font-size:16px}}"
+    },
+    {
+      "name": "导航项",
+      "kind": "nav",
+      "refersTo": "navigation-active",
+      "description": "共用六入口导航的当前项和普通项。",
+      "html": "<nav class=\"ds-nav\" aria-label=\"工作台导航\"><button class=\"ds-nav-item ds-nav-active\" aria-current=\"page\">数据导入</button><button class=\"ds-nav-item\">经营看板</button></nav>",
+      "css": ".ds-nav{display:grid;gap:5px;width:180px}.ds-nav-item{min-height:44px;padding:8px 12px;border:0;border-radius:10px;background:transparent;color:var(--muted);text-align:left;font:14px var(--font-sans);cursor:pointer;transition:background var(--motion-fast) var(--motion-ease),color var(--motion-fast) var(--motion-ease)}.ds-nav-item:hover{background:#f0f0f2;color:var(--ink)}.ds-nav-active{background:var(--selected);color:var(--ink);font-weight:600}.ds-nav-item:focus-visible{outline:2px solid var(--focus);outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-nav-item{transition:none}}"
+    },
+    {
+      "name": "普通卡片",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "白色无投影的业务分组。",
+      "html": "<section class=\"ds-card\"><h2 class=\"ds-card-title\">渠道贡献</h2><p class=\"ds-card-note\">查看销售与贡献毛益</p></section>",
+      "css": ".ds-card{padding:24px;border:1px solid var(--line);border-radius:var(--radius-card);background:var(--surface);color:var(--ink);font-family:var(--font-sans)}.ds-card-title{margin:0;font-size:17px;font-weight:600}.ds-card-note{margin:8px 0 0;color:var(--muted);font-size:12px}"
+    },
+    {
+      "name": "风险状态标签",
+      "kind": "chip",
+      "refersTo": "chip-warning",
+      "description": "风险颜色配对状态文字；标签不是操作按钮。",
+      "html": "<span class=\"ds-warning\">待核对</span>",
+      "css": ".ds-warning{display:inline-block;padding:4px 9px;border-radius:999px;background:var(--warning-surface);color:var(--warning);font:500 12px/1.5 var(--font-sans)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "中性浅色系统工作台",
+    "overview": "按 Ray 明确指定的 Apple Developer Console / macOS 设置式方向实现。浅灰画布、白色分组、石墨黑操作与系统字体共同提供稳定、清楚的经营界面；蓝色只承担链接、焦点和选框的识别。保留垛田标志轮廓，以石墨灰单色版本融入工作台。\n\n以任务、数据和真实状态建立层级。密度通过留白、分组和文字层级调节，不以大面积品牌色、聊天气泡或装饰效果填充页面。此文件记录当前已实现的视觉系统；产品能力和约束见 `PRODUCT.md`，页面任务见对应 surface brief。",
+    "keyCharacteristics": [
+      "中性浅色表面，清晰但克制的分组。",
+      "系统字体、紧凑正文、稳定的数字对齐。",
+      "石墨黑主操作、蓝色链接与键盘焦点、保留语义状态色。",
+      "桌面侧栏与手机可展开导航共用六个入口。"
+    ],
+    "rules": [
+      {
+        "name": "The Semantic Color Rule",
+        "section": "colors",
+        "body": "品牌不占用成功色。状态色必须传达实际状态，不能代替状态文字。"
+      },
+      {
+        "name": "The Complete Number Rule",
+        "section": "typography",
+        "body": "金额、百分比和单位应保持可核对；报告宽表通过局部滚动保留完整数字，不把小数末位挤成孤立一行。"
+      },
+      {
+        "name": "The Quiet Surface Rule",
+        "section": "elevation",
+        "body": "新分组沿用表面与边线的层级，不为普通业务卡片增加装饰性投影。"
+      }
+    ],
+    "dos": [
+      "**Do** 从 `globals.css` 取语义 tokens，通过 `workspace.css` 维护共享组件，页面样式只表达布局差异。",
+      "**Do** 延续系统字体、中性分组、石墨主按钮和蓝色可交互提示。",
+      "**Do** 保留完整数字、字段核对、错误反馈、来源与授权状态。",
+      "**Do** 为桌面和手机保留同一套六入口导航，并将宽表滚动限制在局部。",
+      "**Do** 将署名留在正常文档流并在打印时隐藏。"
+    ],
+    "donts": [
+      "**Don't** 恢复稻米白、深田绿的旧视觉主题，或用大面积绿色提示替代信息层级。",
+      "**Don't** 添加渐变、玻璃、发光、装饰图片或普通卡片悬浮阴影。",
+      "**Don't** 引入下载字体、外部字体请求或为本次视觉方向新增依赖。",
+      "**Don't** 把截图验证视口误写成 CSS 断点，或把独立视觉复核当成人工验收与发布许可。"
+    ]
+  }
+}

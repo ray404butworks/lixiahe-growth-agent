@@ -1,37 +1,174 @@
 @import "tailwindcss";
-
 @theme {
-  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "PingFang SC", "Microsoft YaHei", sans-serif;
 }
-
-@layer base {
-  :root {
-    color-scheme: dark;
+:root {
+  color-scheme: light;
+  --paper: #f5f5f7;
+  --surface: #fff;
+  --sidebar: #fafafa;
+  --subtle: #f5f5f7;
+  --selected: #e9e9ed;
+  --ink: #1d1d1f;
+  --muted: #6e6e73;
+  --line: #e5e5ea;
+  --control-line: #c7c7cc;
+  --accent: #007aff;
+  --link: #0066cc;
+  --focus: #007aff;
+  --success: #287747;
+  --success-surface: #edf6ef;
+  --warning: #865a15;
+  --warning-surface: #fff7e8;
+  --danger: #b13a32;
+  --danger-surface: #fff1ef;
+  --radius-panel: 18px;
+  --radius-card: 15px;
+  --radius-control: 11px;
+  --space-page: clamp(24px, 3.4vw, 56px);
+  --content-width: 1320px;
+  --sidebar-width: 208px;
+  --motion-fast: 140ms;
+  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --chart-primary: #637c9c;
+  --chart-secondary: #c3cbd6;
+  --chart-fill: #edf1f6;
+}
+body {
+  min-height: 100dvh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+* {
+  box-sizing: border-box;
+  scrollbar-color: var(--control-line) transparent;
+  scrollbar-width: thin;
+}
+::selection {
+  background: #dcecff;
+  color: var(--ink);
+}
+input,
+textarea {
+  caret-color: var(--accent);
+}
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--control-line);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #aeaeb2;
+}
+/* 正常文档流预留独立底栏；短页贴近视口底部，长页位于内容末尾。 */
+.brand-watermark {
+  flex-shrink: 0;
+  min-height: 56px;
+  margin-left: var(--sidebar-width);
+  padding: 12px var(--space-page) max(18px, env(safe-area-inset-bottom));
+  pointer-events: none;
+  user-select: none;
+  color: #aeaeb2;
+  font-size: 11px;
+  font-weight: 400;
+}
+.brand-watermark > span {
+  display: block;
+  max-width: calc(var(--content-width) - 2 * var(--space-page));
+  margin-inline: auto;
+  text-align: right;
+}
+.legal-page {
+  width: min(100% - 40px, 760px);
+  margin: 64px auto;
+  flex: 1;
+}
+.legal-page h1 {
+  margin: 0 0 32px;
+  font-size: 30px;
+  font-weight: 600;
+}
+.legal-page section {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.legal-page section:first-of-type {
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+}
+.legal-page section:last-of-type {
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+}
+.legal-page section + section {
+  border-top: 0;
+}
+.legal-page h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.legal-page p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.legal-page > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 24px;
+  color: var(--link);
+  font-size: 14px;
+  text-underline-offset: 4px;
+}
+body:has(.legal-page) .brand-watermark {
+  margin-left: 0;
+}
+@media (max-width: 700px) {
+  .brand-watermark {
+    margin-left: 0;
+    padding-inline: max(20px, env(safe-area-inset-left));
   }
-
+  .legal-page {
+    margin-block: 32px;
+  }
+  .legal-page section {
+    padding: 20px;
+  }
+}
+@media print {
+  .brand-watermark {
+    display: none;
+  }
   body {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #0f0f17 0%, #1a1a2e 50%, #16213e 100%);
-    color: #fff;
-    font-family: var(--font-sans);
+    display: block;
+    background: white;
   }
-
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: rgb(255 255 255 / 5%);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: rgb(139 92 246 / 30%);
-    border-radius: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgb(139 92 246 / 50%);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
   }
 }

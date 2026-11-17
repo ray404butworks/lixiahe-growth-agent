@@ -52,7 +52,7 @@
 
 .growth-dashboard .dashboard-filters :is(input, select) {
   background: var(--surface);
-  border-color: #b9c7b7;
+  border-color: var(--control-line);
   color: var(--ink);
   font-size: 14px;
 }
@@ -137,12 +137,12 @@
 
 .growth-dashboard .dashboard-next .button {
   min-height: 44px;
-  background: var(--green);
+  background: var(--ink);
   flex-shrink: 0;
 }
 
 .growth-dashboard .dashboard-next .button:hover {
-  background: #1d3f2c;
+  background: var(--ink);
 }
 
 .growth-dashboard .panel {
@@ -274,6 +274,6 @@
   }
 
   .growth-dashboard .dashboard-channel-values td.negative {
-    color: #a33b2b;
+    color: var(--warning);
   }
 }

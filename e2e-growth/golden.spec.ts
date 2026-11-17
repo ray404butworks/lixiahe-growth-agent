@@ -10,7 +10,7 @@ test("合成样例、映射、指标、筛选、清除", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /载入样例：正常经营/ }).click();
   await page.getByRole("button", { name: /确认导入，查看看板/ }).click();
-  await expect(page.getByText("225,436.00", { exact: true })).toBeVisible();
+  await expect(page.locator(".kpi").first()).toContainText("225,436.00");
   await openMobileControl(page, "筛选");
   await page
     .getByRole("combobox", { name: "销售渠道", exact: true })
@@ -37,7 +37,7 @@ test("XLSX样例导入", async ({ page }) => {
   await expect(page.locator(".kpi").first()).toContainText("225,436.00");
 });
 
-// 阶段三待真实浏览器复验；当前已由组件测试与HTTP检查覆盖。
+// 按可访问角色定位嵌套选择框，覆盖桌面和移动端的真实操作链路。
 test("无Key诊断、事实核对、营销草稿与七日清单", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /载入样例：正常经营/ }).click();
@@ -52,7 +52,9 @@ test("无Key诊断、事实核对、营销草稿与七日清单", async ({ page 
     .getByRole("button", { name: "生成营销方案", exact: true })
     .first()
     .click();
-  await page.getByLabel("选择商品", { exact: true }).selectOption("RICE-5KG");
+  await page
+    .getByRole("combobox", { name: "选择商品", exact: true })
+    .selectOption("RICE-5KG");
   await page.getByRole("checkbox", { name: "我已核对商品名称" }).check();
   await page.getByRole("checkbox", { name: "我已核对商品规格" }).check();
   await page.getByRole("button", { name: "生成营销草稿", exact: true }).click();
@@ -68,6 +70,27 @@ test("无Key诊断、事实核对、营销草稿与七日清单", async ({ page 
   ).toBeVisible();
   await expect(page.getByText(/人工复核版草稿/)).toBeVisible();
   await expect(page.getByText(/合成样例 · 仅用于演示/).first()).toBeVisible();
+  // 金额和百分比应为完整字串；宽表可以在自身容器中横向滚动。
+  const splitNumbers = await page
+    .locator(".report-document td")
+    .evaluateAll((cells) =>
+      cells
+        .filter((cell) => {
+          const value = cell.textContent?.trim() ?? "";
+          if (!/^[¥\d,.%-]+$/.test(value)) return false;
+          const range = document.createRange();
+          range.selectNodeContents(cell);
+          return (
+            new Set(
+              Array.from(range.getClientRects(), (rect) =>
+                Math.round(rect.top),
+              ),
+            ).size > 1
+          );
+        })
+        .map((cell) => cell.textContent),
+    );
+  expect(splitNumbers).toEqual([]);
   for (const [label, extension] of [
     ["下载 Markdown", ".md"],
     ["下载 HTML", ".html"],

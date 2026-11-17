@@ -1,3 +1,450 @@
-.agent-status-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 17px;background:#edf2e7;border:1px solid #dce6d2;border-radius:6px;margin-bottom:17px;font-size:11px;color:#718368}.agent-status-bar small{margin-left:auto;font-size:10px;color:#8b997f}.growth-app .model-consent{display:flex;align-items:center;gap:8px;font-size:11px;color:#7f8b74;margin:10px 0 22px}.growth-app .diagnosis-intro{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:29px}.diagnosis-intro h2{font:500 22px/1.6 Georgia,"Songti SC",serif}.diagnosis-intro p:not(.eyebrow){font-size:11px;color:#8b987c;margin-top:9px}.agent-page>.info-banner{justify-content:space-between;flex-wrap:wrap}.agent-page>.info-banner small{font:9px/1.6 ui-monospace,monospace;color:#829875}.agent-summary{font-size:12px;color:#7b8970;margin:10px 2px 22px!important}.recommendation{border-left:3px solid #7c9a65}.recommendation .section-title{align-items:flex-start}.recommendation h2{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.priority{font:10px/1.5 ui-monospace,monospace;padding:3px 6px;border-radius:3px;letter-spacing:.5px}.priority.p1{background:#f4ece0;color:#9b7448}.priority.p2{background:#e7eddd;color:#6e875a}.priority.p3{background:#edf0ea;color:#87977c}.evidence-strip{display:flex;gap:18px;flex-wrap:wrap;background:#f6f8f2;padding:14px 17px;border-radius:5px}.evidence-strip>span{font-size:9px;letter-spacing:1px;color:#90a080;padding-top:3px}.evidence-strip>div{display:grid;gap:3px;min-width:100px;max-width:100%}.evidence-strip small{font-size:10px;color:#80946f;overflow-wrap:anywhere}.evidence-strip b{font:500 20px/1.4 ui-monospace,monospace;color:#375d39}.evidence-strip code{font:8px/1.7 ui-monospace,monospace;color:#9ca98d;overflow-wrap:anywhere;max-width:350px}.recommendation dl{margin:19px 0 12px;display:grid;gap:13px}.recommendation dl>div{display:grid;grid-template-columns:130px 1fr;gap:15px}.recommendation dt{font-size:10px;color:#9aa68a}.recommendation dd{margin:0;color:#667b56;font-size:12px;line-height:1.9}.source-links{display:flex;align-items:center;flex-wrap:wrap;gap:7px 13px;border-top:1px solid #edf2e7;padding-top:13px;margin-top:12px;color:#9baa8c}.source-links .text-button{font-size:9px!important}.knowledge-filter{display:flex;align-items:center;gap:8px;font-size:11px;color:#8b9a7d}.knowledge-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.knowledge-card{margin-bottom:0;display:flex;flex-direction:column}.knowledge-id{font:11px/1.5 ui-monospace,monospace;color:#91a17e;letter-spacing:2px}.knowledge-card>p{font-size:12px;line-height:1.9;color:#778a65;margin:13px 0}.knowledge-constraint{padding:11px 13px;background:#f6f5ec;border-left:2px solid #d8c99e;font-size:10px;line-height:1.9;color:#978958}.knowledge-card dl{display:grid;gap:5px;font-size:10px;line-height:1.9;margin-top:15px;color:#8f9b7e}.knowledge-card dl>div{display:grid;grid-template-columns:65px 1fr;gap:10px}.knowledge-card dd{margin:0;color:#71845d}.knowledge-card>a{margin-top:auto;padding-top:10px}.facts-top,.facts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.facts-top{margin-bottom:20px}.facts-top label,.fact-field>label:first-child,.draft-card>label,.script-segment>label{display:grid;gap:6px;font-size:11px;color:#7f8f6e}.fact-field{margin-bottom:15px}.fact-check{display:flex;align-items:center;gap:7px;font-size:10px;color:#91a07f;margin-top:8px}.fact-field input:not([type=checkbox]){width:100%}.facts-grid{margin-top:10px}.growth-app textarea{font:12px/1.9 ui-sans-serif,system-ui,"Microsoft YaHei",sans-serif;border:1px solid #dce5d1;border-radius:5px;background:#fbfcf9;color:#5c754a;padding:10px 12px;resize:vertical;width:100%;min-height:85px}.draft-output>.section-title{margin:24px 0 18px}.draft-output>.missing-fields{margin:10px 0 20px}.draft-card h3{margin-bottom:18px}.draft-card>label{margin-top:15px}.draft-card>label input{width:100%}.script-segment{display:grid;grid-template-columns:140px 1fr 1fr;gap:17px;border-top:1px solid #edf2e6;margin-top:18px;padding-top:18px}.script-segment>span{font:10px/1.7 ui-monospace,monospace;color:#93a17f;padding-top:20px}.copy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.action-week{list-style:none;padding:0;margin:0}.action-week li{display:flex;align-items:flex-start;gap:20px;padding:15px 0;border-bottom:1px solid #edf1e6;font-size:12px;color:#718960;line-height:1.9}.action-week li:last-child{border:0}.action-week b{font:10px/1.9 ui-monospace,monospace;color:#9caa8a;white-space:nowrap;padding-top:2px}.action-week small{display:block;font-size:9px;color:#a0ae8d;margin-top:4px}.review-line{display:flex;align-items:flex-start;gap:8px;margin-top:12px!important;font-size:11px;color:#8b9b76}.review-line svg{flex-shrink:0;margin-top:3px}.draft-output .info-banner{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-@media(max-width:1050px){.script-segment{grid-template-columns:1fr 1fr}.script-segment>span{grid-column:1/-1;padding:0}.recommendation dl>div{grid-template-columns:110px 1fr;gap:10px}.knowledge-grid{gap:13px}.copy-grid{grid-template-columns:1fr;gap:0}}
-@media(max-width:700px){.growth-app .sidebar{flex-wrap:wrap;gap:14px}.growth-app .sidebar nav{flex-basis:100%;overflow:auto;margin:0;gap:4px}.growth-app .sidebar nav button{flex-shrink:0;font-size:10px;padding:8px;white-space:nowrap}.growth-app .diagnosis-intro{align-items:stretch;flex-direction:column;padding:20px}.diagnosis-intro h2{font-size:20px}.agent-status-bar small{margin-left:0}.agent-page .recommendation dl>div{grid-template-columns:1fr;gap:4px}.knowledge-grid,.facts-top,.facts-grid,.script-segment{grid-template-columns:1fr}.facts-top,.facts-grid{gap:12px}.evidence-strip{gap:14px;padding:12px}.evidence-strip>span{width:100%}.evidence-strip b{font-size:17px}.script-segment>span{grid-column:auto}.action-week li{gap:12px;font-size:11px}.knowledge-card dl>div{grid-template-columns:60px 1fr}.agent-status-bar{font-size:10px!important}.agent-status-bar small{font-size:9px}.draft-output>.section-title{align-items:flex-start;flex-direction:column}}
+.agent-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 17px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin-bottom: 17px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.agent-status-bar small {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--muted);
+}
+.growth-app .model-consent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 10px 0 22px;
+}
+.growth-app .diagnosis-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 29px;
+}
+.diagnosis-intro h2 {
+  font:
+    500 22px/1.6 Georgia,
+    "Songti SC",
+    serif;
+}
+.diagnosis-intro p:not(.eyebrow) {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 9px;
+}
+.agent-page > .info-banner {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.agent-page > .info-banner small {
+  font:
+    9px/1.6 ui-monospace,
+    monospace;
+  color: var(--muted);
+}
+.agent-summary {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 10px 2px 22px !important;
+}
+.recommendation {
+  border-left: 1px solid var(--line);
+}
+.recommendation .section-title {
+  align-items: flex-start;
+}
+.recommendation h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.priority {
+  font:
+    10px/1.5 ui-monospace,
+    monospace;
+  padding: 3px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+.priority.p1 {
+  background: var(--line);
+  color: var(--warning);
+}
+.priority.p2 {
+  background: var(--line);
+  color: var(--muted);
+}
+.priority.p3 {
+  background: var(--line);
+  color: var(--muted);
+}
+.evidence-strip {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: var(--subtle);
+  padding: 14px 17px;
+  border-radius: 5px;
+}
+.evidence-strip > span {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  padding-top: 3px;
+}
+.evidence-strip > div {
+  display: grid;
+  gap: 3px;
+  min-width: 100px;
+  max-width: 100%;
+}
+.evidence-strip small {
+  font-size: 10px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.evidence-strip b {
+  font:
+    500 20px/1.4 ui-monospace,
+    monospace;
+  color: var(--ink);
+}
+.evidence-strip code {
+  font:
+    8px/1.7 ui-monospace,
+    monospace;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  max-width: 350px;
+}
+.recommendation dl {
+  margin: 19px 0 12px;
+  display: grid;
+  gap: 13px;
+}
+.recommendation dl > div {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 15px;
+}
+.recommendation dt {
+  font-size: 10px;
+  color: var(--muted);
+}
+.recommendation dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.9;
+}
+.source-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 13px;
+  border-top: 1px solid var(--line);
+  padding-top: 13px;
+  margin-top: 12px;
+  color: var(--muted);
+}
+.source-links .text-button {
+  font-size: 9px !important;
+}
+.knowledge-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.knowledge-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.knowledge-card {
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+.knowledge-id {
+  font:
+    11px/1.5 ui-monospace,
+    monospace;
+  color: var(--muted);
+  letter-spacing: 2px;
+}
+.knowledge-card > p {
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--muted);
+  margin: 13px 0;
+}
+.knowledge-constraint {
+  padding: 11px 13px;
+  background: var(--subtle);
+  border-left: 2px solid var(--control-line);
+  font-size: 10px;
+  line-height: 1.9;
+  color: var(--muted);
+}
+.knowledge-card dl {
+  display: grid;
+  gap: 5px;
+  font-size: 10px;
+  line-height: 1.9;
+  margin-top: 15px;
+  color: var(--muted);
+}
+.knowledge-card dl > div {
+  display: grid;
+  grid-template-columns: 65px 1fr;
+  gap: 10px;
+}
+.knowledge-card dd {
+  margin: 0;
+  color: var(--muted);
+}
+.knowledge-card > a {
+  margin-top: auto;
+  padding-top: 10px;
+}
+.facts-top,
+.facts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.facts-top {
+  margin-bottom: 20px;
+}
+.facts-top label,
+.fact-field > label:first-child,
+.draft-card > label,
+.script-segment > label {
+  display: grid;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.fact-field {
+  margin-bottom: 15px;
+}
+.fact-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.fact-field input:not([type="checkbox"]) {
+  width: 100%;
+}
+.facts-grid {
+  margin-top: 10px;
+}
+.growth-app textarea {
+  font:
+    12px/1.9 ui-sans-serif,
+    system-ui,
+    "Microsoft YaHei",
+    sans-serif;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--muted);
+  padding: 10px 12px;
+  resize: vertical;
+  width: 100%;
+  min-height: 85px;
+}
+.draft-output > .section-title {
+  margin: 24px 0 18px;
+}
+.draft-output > .missing-fields {
+  margin: 10px 0 20px;
+}
+.draft-card h3 {
+  margin-bottom: 18px;
+}
+.draft-card > label {
+  margin-top: 15px;
+}
+.draft-card > label input {
+  width: 100%;
+}
+.script-segment {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr;
+  gap: 17px;
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+  padding-top: 18px;
+}
+.script-segment > span {
+  font:
+    10px/1.7 ui-monospace,
+    monospace;
+  color: var(--muted);
+  padding-top: 20px;
+}
+.copy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.action-week {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.action-week li {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.9;
+}
+.action-week li:last-child {
+  border: 0;
+}
+.action-week b {
+  font:
+    10px/1.9 ui-monospace,
+    monospace;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-top: 2px;
+}
+.action-week small {
+  display: block;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.review-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px !important;
+  font-size: 11px;
+  color: var(--muted);
+}
+.review-line svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.draft-output .info-banner {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+@media (max-width: 1050px) {
+  .script-segment {
+    grid-template-columns: 1fr 1fr;
+  }
+  .script-segment > span {
+    grid-column: 1/-1;
+    padding: 0;
+  }
+  .recommendation dl > div {
+    grid-template-columns: 110px 1fr;
+    gap: 10px;
+  }
+  .knowledge-grid {
+    gap: 13px;
+  }
+  .copy-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+@media (max-width: 700px) {
+  .growth-app .sidebar {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .growth-app .sidebar nav {
+    flex-basis: 100%;
+    overflow: auto;
+    margin: 0;
+    gap: 4px;
+  }
+  .growth-app .sidebar nav button {
+    flex-shrink: 0;
+    font-size: 10px;
+    padding: 8px;
+    white-space: nowrap;
+  }
+  .growth-app .diagnosis-intro {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 20px;
+  }
+  .diagnosis-intro h2 {
+    font-size: 20px;
+  }
+  .agent-status-bar small {
+    margin-left: 0;
+  }
+  .agent-page .recommendation dl > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .knowledge-grid,
+  .facts-top,
+  .facts-grid,
+  .script-segment {
+    grid-template-columns: 1fr;
+  }
+  .facts-top,
+  .facts-grid {
+    gap: 12px;
+  }
+  .evidence-strip {
+    gap: 14px;
+    padding: 12px;
+  }
+  .evidence-strip > span {
+    width: 100%;
+  }
+  .evidence-strip b {
+    font-size: 17px;
+  }
+  .script-segment > span {
+    grid-column: auto;
+  }
+  .action-week li {
+    gap: 12px;
+    font-size: 11px;
+  }
+  .knowledge-card dl > div {
+    grid-template-columns: 60px 1fr;
+  }
+  .agent-status-bar {
+    font-size: 10px !important;
+  }
+  .agent-status-bar small {
+    font-size: 9px;
+  }
+  .draft-output > .section-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

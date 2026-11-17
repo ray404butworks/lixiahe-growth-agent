@@ -58,3 +58,6 @@ yarn-error.log*
 
 # Bundled phase-three local server
 /server-dist/
+
+# Local visual verification artifacts
+/output/

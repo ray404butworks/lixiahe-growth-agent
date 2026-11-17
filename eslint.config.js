@@ -2,12 +2,13 @@ import { FlatCompat } from "@eslint/eslintrc";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import prettierPlugin from "eslint-plugin-prettier";
+import { fileURLToPath } from "node:url";
 
 // Intentionally avoid compat.extends on next/core-web-vitals — in some setups
 // that shareable config creates circular structures. Keep a small, stable
 // flat config that enables TypeScript plugin rules and uses the parser.
 const compat = new FlatCompat({
-  baseDirectory: new URL("./", import.meta.url).pathname,
+  baseDirectory: fileURLToPath(new URL("./", import.meta.url)),
 });
 
 export default [

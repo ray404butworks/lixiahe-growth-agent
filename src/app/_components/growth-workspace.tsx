@@ -19,6 +19,7 @@ import {
   NotebookPen,
   BookOpen,
   ScanLine,
+  Settings2,
 } from "lucide-react";
 import {
   AreaChart,
@@ -65,11 +66,6 @@ import {
   SPREADSHEET_ACCEPT,
 } from "~/lib/xlsx-parser";
 import { listXLSXSheets } from "csv-charts-ai/tabular";
-import "~/styles/growth.css";
-import "~/styles/agent.css";
-import "~/styles/workspace.css";
-import "~/styles/dashboard.css";
-import "~/styles/import.css";
 import { AgentWorkbench } from "./agent-workbench";
 import { WorkspaceEmptyState } from "./workspace-empty-state";
 import type { DiagnosisRequest } from "~/lib/agent/schema";
@@ -120,6 +116,10 @@ function WorkspaceNavigation({
           {pages[view].label}
         </button>
       ))}
+      <a className="workspace-settings-link" href="/legal/">
+        <Settings2 size={17} aria-hidden="true" />
+        数据设置
+      </a>
     </nav>
   );
 }
@@ -136,7 +136,9 @@ function WorkspaceBrand() {
           alt=""
         />
       </span>
-      <span>里下河</span>
+      <span>
+        里下河<small>农企增长 Agent</small>
+      </span>
     </a>
   );
 }
@@ -1125,21 +1127,21 @@ export function GrowthWorkspace({
                               >
                                 <CartesianGrid
                                   vertical={false}
-                                  stroke="#e7ece7"
+                                  stroke="var(--line)"
                                 />
                                 <XAxis
                                   dataKey="date"
                                   tickLine={false}
                                   axisLine={false}
                                   minTickGap={35}
-                                  tick={{ fontSize: 11, fill: "#758175" }}
+                                  tick={{ fontSize: 11, fill: "var(--muted)" }}
                                 />
                                 <YAxis
                                   tickFormatter={shortNumber}
                                   tickLine={false}
                                   axisLine={false}
                                   width={46}
-                                  tick={{ fontSize: 11, fill: "#758175" }}
+                                  tick={{ fontSize: 11, fill: "var(--muted)" }}
                                 />
                                 <Tooltip
                                   formatter={(value) => [
@@ -1149,8 +1151,8 @@ export function GrowthWorkspace({
                                 />
                                 <Area
                                   dataKey="amount"
-                                  stroke="#28644d"
-                                  fill="#e0eee6"
+                                  stroke="var(--chart-primary)"
+                                  fill="var(--chart-fill)"
                                   strokeWidth={2}
                                   isAnimationActive={false}
                                 />
@@ -1214,7 +1216,7 @@ export function GrowthWorkspace({
                               >
                                 <CartesianGrid
                                   vertical={false}
-                                  stroke="#e7ece7"
+                                  stroke="var(--line)"
                                 />
                                 <XAxis
                                   dataKey="name"
@@ -1239,13 +1241,13 @@ export function GrowthWorkspace({
                                 />
                                 <Bar
                                   dataKey="sales"
-                                  fill="#2d6b50"
+                                  fill="var(--chart-primary)"
                                   radius={[3, 3, 0, 0]}
                                   isAnimationActive={false}
                                 />
                                 <Bar
                                   dataKey="contribution"
-                                  fill="#b5cdb4"
+                                  fill="var(--chart-secondary)"
                                   radius={[3, 3, 0, 0]}
                                   isAnimationActive={false}
                                 />

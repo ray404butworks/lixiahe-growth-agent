@@ -9,7 +9,6 @@ import {
   reportMarkdown,
   type ReportSource,
 } from "~/lib/growth/report";
-import "~/styles/report.css";
 import { WorkspaceEmptyState } from "./workspace-empty-state";
 
 /** 展示当前经营范围的报告及打印、文件导出入口。 */
@@ -76,7 +75,6 @@ export function GrowthReportView({
       </div>
       <article className="report-document panel" aria-labelledby="report-title">
         <header>
-          <p className="eyebrow">LIXIAHE · BUSINESS REVIEW</p>
           <h2 id="report-title">{report.title}</h2>
           <p>{report.subtitle}</p>
         </header>
