@@ -11,3 +11,14 @@ overrides:
   'hono@>=4.0.0 <4.13.16': 4.13.16
   'esbuild@>=0.27.3 <0.28.1': 0.28.1
   'minimatch@>=7.0.0 <11.0.1': 11.0.1
+
+# Audit policy for `pnpm audit` in CI (see .github/workflows/security.yml).
+audit:
+  level: moderate
+  ignore:
+    # picomatch <=4.0.7 ReDoS via single-branch repeated extglobs.
+    # No patched release exists yet (4.0.7 is still the latest on npm).
+    # Reachable only through devDependencies (semantic-release, typescript-eslint,
+    # vite, vitest, tsup) - no production/runtime exposure.
+    # Remove this entry once picomatch >4.0.7 is published, so the check fails again on purpose.
+    - GHSA-fc5q-39xc-vjpf
